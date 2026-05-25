@@ -1,0 +1,300 @@
+# NudgeKit
+
+Compose-first Android tips with rules, persistence, and reusable UI.
+
+NudgeKit is an Android library for contextual tips, feature discovery hints, and onboarding nudges. It is inspired by Apple TipKit, but built around Kotlin, Jetpack Compose, and Android app constraints.
+
+Status:
+
+- MVP implemented
+- 112 unit tests passing in a correctly configured environment
+- sample app included
+- not published yet
+- Maven publishing not configured yet
+- CI not configured yet
+
+## Why NudgeKit
+
+Android apps often end up with:
+
+- one-off tooltip UI
+- scattered SharedPreferences flags
+- ad hoc event counters
+- custom "show once" logic
+- dismissal state that is hard to reason about
+
+NudgeKit provides one small library surface for those concerns:
+
+- `nudgekit-core`: Android-free rule engine and models
+- `nudgekit-datastore`: DataStore-backed persistence and evaluation helpers
+- `nudgekit-compose`: Compose UI components
+- `sample`: a demo app for the current MVP
+
+## Quick Example
+
+```kotlin
+private val checkoutTip = Tip(
+    id = "save_address",
+    title = "Save your address",
+    message = "Save your delivery address for faster checkout next time.",
+    actionLabel = "Add address",
+    rules = listOf(
+        TipRule.NotDismissed,
+        TipRule.AfterScreenVisits("checkout", 2),
+        TipRule.MaxDisplayCount(1),
+    ),
+)
+
+class MainActivity : ComponentActivity() {
+    private val tipManager by lazy { DataStoreTipManager.create(applicationContext) }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            MaterialTheme {
+                ManagedInlineTip(
+                    tip = checkoutTip,
+                    manager = tipManager,
+                    modifier = Modifier.fillMaxWidth(),
+                    onActionClick = { /* open address flow */ },
+                )
+            }
+        }
+    }
+}
+```
+
+## Installation
+
+NudgeKit is not published yet.
+
+Planned future coordinates:
+
+```kotlin
+implementation("dev.nudgekit:nudgekit-core:<version>")
+implementation("dev.nudgekit:nudgekit-datastore:<version>")
+implementation("dev.nudgekit:nudgekit-compose:<version>")
+```
+
+For now, use the modules locally in a multi-module Gradle build:
+
+```kotlin
+// settings.gradle.kts
+include(":nudgekit-core")
+include(":nudgekit-datastore")
+include(":nudgekit-compose")
+
+project(":nudgekit-core").projectDir = file("../NudgeKit/nudgekit-core")
+project(":nudgekit-datastore").projectDir = file("../NudgeKit/nudgekit-datastore")
+project(":nudgekit-compose").projectDir = file("../NudgeKit/nudgekit-compose")
+```
+
+```kotlin
+// app/build.gradle.kts
+dependencies {
+    implementation(project(":nudgekit-core"))
+    implementation(project(":nudgekit-datastore"))
+    implementation(project(":nudgekit-compose"))
+}
+```
+
+Requirements:
+
+- Android minSdk 24
+- Kotlin 2.1.0
+- Java 17
+- Compose BOM `2024.12.01`
+
+Build with JDK 17. This repo has previously failed when launched with Java 25 instead of Java 17.
+
+## Quick Start
+
+### 1. Create one shared `DataStoreTipManager`
+
+```kotlin
+class MyApp : Application() {
+    val tipManager by lazy { DataStoreTipManager.create(this) }
+}
+```
+
+### 2. Define a `Tip`
+
+```kotlin
+val favoritesTip = Tip(
+    id = "favorites_tip",
+    title = "Save favorites",
+    message = "Tap the heart icon to save items for later.",
+    actionLabel = "Try it",
+    rules = listOf(
+        TipRule.NotDismissed,
+        TipRule.AfterEvent("item_viewed", 3),
+        TipRule.MaxDisplayCount(1),
+    ),
+)
+```
+
+### 3. Show it with `ManagedInlineTip`
+
+```kotlin
+@Composable
+fun ProductScreen(manager: DataStoreTipManager) {
+    ManagedInlineTip(
+        tip = favoritesTip,
+        manager = manager,
+        modifier = Modifier.fillMaxWidth(),
+        onActionClick = { /* navigate or trigger UI */ },
+    )
+}
+```
+
+### 4. Track screens and events
+
+```kotlin
+LaunchedEffect(Unit) {
+    manager.trackScreen("product")
+}
+
+scope.launch {
+    manager.trackEvent("item_viewed")
+}
+```
+
+## Core Concepts
+
+- `Tip`: immutable value object with `id`, `title`, `message`, optional `actionLabel`, optional `priority`, and a list of `TipRule`
+- `TipRule`: built-in rules include `NotDismissed`, `Once`, `MaxDisplayCount`, `AfterEvent`, `AfterScreenVisits`, `MinIntervalHours`, and `Custom`
+- `TipState`: per-tip dismissed state, display count, and last shown timestamp
+- `TipCounters`: app-wide event counts and screen visit counts
+- `TipManager`: write-side lifecycle interface
+- `DataStoreTipManager`: Android DataStore implementation plus evaluation helpers
+- Managed UI: `ManagedInlineTip` and `ManagedTipBox`
+
+## Examples
+
+### InlineTip
+
+```kotlin
+InlineTip(
+    tip = Tip(
+        id = "filters",
+        title = "Use filters",
+        message = "Filter results to find items faster.",
+        actionLabel = "Open filters",
+    ),
+    modifier = Modifier.fillMaxWidth(),
+    onDismiss = { /* hide locally */ },
+    onActionClick = { /* open filters */ },
+)
+```
+
+### TipBox
+
+```kotlin
+TipBox(
+    tip = Tip(
+        id = "notifications",
+        title = "Enable notifications",
+        message = "Get updates for important activity.",
+        actionLabel = "Enable",
+    ),
+    visible = true,
+    position = TipPosition.Bottom,
+    onDismiss = { /* hide it */ },
+    onActionClick = { /* open settings */ },
+) {
+    Button(onClick = {}) {
+        Text("Notification settings")
+    }
+}
+```
+
+### Event-driven tip
+
+```kotlin
+val reviewTip = Tip(
+    id = "review_tip",
+    title = "Leave a review",
+    message = "You have viewed several items. Tell us what you think.",
+    rules = listOf(
+        TipRule.NotDismissed,
+        TipRule.AfterEvent("item_viewed", 3),
+        TipRule.MaxDisplayCount(1),
+    ),
+)
+```
+
+### Screen-visit tip
+
+```kotlin
+val checkoutTip = Tip(
+    id = "checkout_tip",
+    title = "Save your address",
+    message = "Save your address to speed up checkout.",
+    rules = listOf(
+        TipRule.NotDismissed,
+        TipRule.AfterScreenVisits("checkout", 2),
+    ),
+)
+```
+
+### Reset tips
+
+```kotlin
+scope.launch {
+    manager.reset("checkout_tip")
+    manager.resetAll()
+}
+```
+
+## Why Not Just TooltipBox?
+
+`TooltipBox` is a UI primitive. NudgeKit adds the behavior layer:
+
+- eligibility rules
+- dismissal state
+- display counts
+- event thresholds
+- screen-visit thresholds
+- interval rules
+- persistence across restarts
+
+If you only need a tooltip, use a tooltip. If you need "show the right nudge at the right time and remember what happened", use NudgeKit.
+
+## Current Limitations
+
+- no Compose UI tests yet
+- `TipBox` positioning is intentionally simple, not pixel-perfect
+- `nudgekit-compose` currently depends on `nudgekit-datastore`
+- managed components observe all counters through `observeCounters()`
+- managed components use `collectAsState`, not `collectAsStateWithLifecycle`
+- production apps should use one shared `DataStoreTipManager` instance
+- publishing is not configured yet
+
+## Roadmap
+
+Near-term priorities:
+
+- decouple `nudgekit-compose` from the DataStore implementation
+- add Compose UI tests
+- improve `TipBox` positioning and anchoring
+- tighten managed observation granularity
+- prepare publishing and release packaging
+
+## Documentation
+
+- [Getting started](docs/getting-started.md)
+- [Core concepts](docs/core-concepts.md)
+- [Rules](docs/rules.md)
+- [DataStore manager](docs/datastore.md)
+- [Compose UI](docs/compose-ui.md)
+- [Sample app](docs/sample-app.md)
+- [Limitations](docs/limitations.md)
+- [Roadmap](docs/roadmap.md)
+
+## Contributing
+
+Contributions are welcome, especially around API review, Compose UI polish, tests, and documentation improvements.
+
+## License
+
+NudgeKit is licensed under the Apache License 2.0. See [LICENSE](LICENSE).

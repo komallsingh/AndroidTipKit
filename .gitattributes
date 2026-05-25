@@ -1,0 +1,90 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# NudgeKit — .gitattributes
+#
+# Normalize line endings across platforms. Text files are stored as LF in the
+# repository; checked-out files use LF on all platforms unless overridden
+# below (gradlew.bat needs CRLF to run on Windows).
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Default: auto-detect text, normalize to LF in the repo.
+* text=auto eol=lf
+
+# ── Kotlin / Java source ─────────────────────────────────────────────────────
+*.kt        text eol=lf
+*.kts       text eol=lf
+*.java      text eol=lf
+
+# ── Build / config files ─────────────────────────────────────────────────────
+*.xml          text eol=lf
+*.toml         text eol=lf
+*.properties   text eol=lf
+*.yml          text eol=lf
+*.yaml         text eol=lf
+*.json         text eol=lf
+*.gradle       text eol=lf
+# ProGuard / R8 rules
+*.pro          text eol=lf
+.editorconfig  text eol=lf
+.gitattributes text eol=lf
+.gitignore     text eol=lf
+
+# ── Documentation ────────────────────────────────────────────────────────────
+*.md   text eol=lf
+*.txt  text eol=lf
+LICENSE text eol=lf
+
+# ── Shell / wrapper scripts ──────────────────────────────────────────────────
+# Unix shell scripts must stay LF.
+*.sh    text eol=lf
+gradlew text eol=lf
+
+# Windows batch / cmd scripts must stay CRLF to run correctly on Windows.
+*.bat       text eol=crlf
+*.cmd       text eol=crlf
+gradlew.bat text eol=crlf
+
+# ── Binary files (never normalize, never diff as text) ───────────────────────
+*.jar    binary
+*.war    binary
+*.aar    binary
+*.apk    binary
+*.aab    binary
+*.keystore binary
+*.jks    binary
+
+# Images
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.webp   binary
+*.ico    binary
+*.bmp    binary
+
+# Vector / drawables (treat as text — XML — but listed here for clarity).
+*.svg    text eol=lf
+
+# Fonts
+*.ttf    binary
+*.otf    binary
+*.woff   binary
+*.woff2  binary
+*.eot    binary
+
+# Archives
+*.zip    binary
+*.gz     binary
+*.tgz    binary
+*.tar    binary
+*.7z     binary
+
+# Native libs / compiled artifacts
+*.so     binary
+*.dll    binary
+*.dylib  binary
+*.class  binary
+
+# ── Linguist hints (optional, for GitHub language stats) ─────────────────────
+gradle/wrapper/gradle-wrapper.properties linguist-generated=true
+gradlew                                  linguist-generated=true
+gradlew.bat                              linguist-generated=true
