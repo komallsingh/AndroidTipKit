@@ -1,0 +1,64 @@
+# NudgeKit — Continuous Integration
+#
+# Runs the full local verification flow on every push to main and every
+# pull request targeting main. The Android SDK is provided by the
+# GitHub-hosted ubuntu-latest runner via the ANDROID_HOME / ANDROID_SDK_ROOT
+# environment variables, so no local.properties file is needed.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build & Test (JDK 17, Ubuntu)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle (with caching)
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Test — nudgekit-core
+        run: ./gradlew :nudgekit-core:test
+
+      - name: Test — nudgekit-datastore
+        run: ./gradlew :nudgekit-datastore:test
+
+      - name: Build — nudgekit-compose
+        run: ./gradlew :nudgekit-compose:build
+
+      - name: Assemble debug APK — sample
+        run: ./gradlew :sample:assembleDebug
+
+      - name: Full project build
+        run: ./gradlew build
+
+      - name: Upload test reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            **/build/reports/tests/
+            **/build/reports/lint-results-*.html
+          if-no-files-found: ignore
+          retention-days: 7

@@ -1,5 +1,7 @@
 # NudgeKit
 
+[![CI](https://github.com/Abdullajon1881/AndroidTipKit/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Abdullajon1881/AndroidTipKit/actions/workflows/ci.yml)
+
 Compose-first Android tips with rules, persistence, and reusable UI.
 
 NudgeKit is an Android library for contextual tips, feature discovery hints, and onboarding nudges. It is inspired by Apple TipKit, but built around Kotlin, Jetpack Compose, and Android app constraints.
