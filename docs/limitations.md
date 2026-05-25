@@ -14,9 +14,9 @@ NudgeKit is an MVP. This document is the honest list of what does not work yet, 
 
 Test counts at the time of this MVP:
 
-- `:nudgekit-core` — 75 unit tests, 0 failures.
+- `:nudgekit-core` — 73 unit tests, 0 failures.
 - `:nudgekit-datastore` — 37 unit tests, 0 failures.
-- Total: **112 tests, 0 failures**.
+- Total: **110 tests, 0 failures**.
 
 ## Module structure
 

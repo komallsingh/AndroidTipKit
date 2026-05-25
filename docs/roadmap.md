@@ -8,7 +8,7 @@ Planned work, in roughly the order we expect to tackle it. Subject to change bas
 - [x] `nudgekit-datastore`: `DataStoreTipManager` with snapshot reads, reactive flows, evaluation helpers.
 - [x] `nudgekit-compose`: `InlineTip`, `TipBox`, `ManagedInlineTip`, `ManagedTipBox`, `TipPosition`, `NudgeTipDefaults`, `NudgeTipColors`, previews.
 - [x] Working sample app exercising all of the above.
-- [x] 112 passing unit tests across `nudgekit-core` and `nudgekit-datastore`.
+- [x] 110 passing unit tests across `nudgekit-core` and `nudgekit-datastore`.
 
 ## v0.2 — Hardening and publishing
 
