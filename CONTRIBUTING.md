@@ -1,0 +1,144 @@
+# Contributing to NudgeKit
+
+Thanks for taking the time to look at NudgeKit. This document covers the practical things you need to know to build, test, and contribute to the project.
+
+## About the project
+
+NudgeKit is a Compose-first Android library for contextual tips, feature discovery hints, and onboarding nudges — inspired by Apple TipKit. It combines a rule engine, DataStore-backed persistence, and Material 3 Compose UI in one small library surface.
+
+**Status: alpha (0.1.x).** APIs may still change. Pre-1.0 PRs that change public types are welcome, but they need a clear rationale and a migration note.
+
+## Repository layout
+
+| Module | Purpose | Android dependency? |
+|---|---|:---:|
+| `nudgekit-core` | Pure Kotlin: `Tip`, `TipRule`, `TipState`, `TipCounters`, `TipEvaluator`, `TipManager` | No (pure JVM) |
+| `nudgekit-datastore` | `DataStoreTipManager` — AndroidX DataStore Preferences implementation | Yes |
+| `nudgekit-compose` | `InlineTip`, `TipBox`, `ManagedInlineTip`, `ManagedTipBox`, styling | Yes |
+| `sample` | Demo app exercising the full MVP | Yes |
+
+Documentation lives under [`docs/`](docs/). The [README](README.md) is the entry point.
+
+## Prerequisites
+
+- **JDK 17** — required. The project does not build under JDK 25.
+  - If your system default is a newer JDK, point `JAVA_HOME` at a JDK 17 install before running Gradle.
+- **Android SDK** with platform 35 + build-tools 35.0.0.
+- **Git** with line-ending normalization respected — `.gitattributes` is in place.
+
+## Local setup
+
+1. Clone the repo and enter the directory.
+2. Create `local.properties` at the repo root pointing at your Android SDK:
+
+   ```properties
+   sdk.dir=/absolute/path/to/Android/Sdk
+   ```
+
+   On Windows escape backslashes:
+
+   ```properties
+   sdk.dir=C\:\\Users\\you\\AppData\\Local\\Android\\Sdk
+   ```
+
+   `local.properties` is git-ignored — never commit it.
+
+3. (If your system Java is not 17) set `JAVA_HOME` for your shell:
+
+   ```bash
+   export JAVA_HOME=/path/to/jdk-17     # macOS / Linux
+   ```
+
+   ```powershell
+   $env:JAVA_HOME = "C:\path\to\jdk-17" # Windows PowerShell
+   ```
+
+4. Verify the build:
+
+   ```bash
+   ./gradlew build
+   ```
+
+## Running tests and builds
+
+```bash
+# Unit tests
+./gradlew :nudgekit-core:test
+./gradlew :nudgekit-datastore:test
+
+# Module + sample builds
+./gradlew :nudgekit-compose:build
+./gradlew :sample:assembleDebug
+
+# Full project
+./gradlew build
+```
+
+Expected: all five tasks `BUILD SUCCESSFUL`, **110 tests, 0 failures** (73 in `nudgekit-core`, 37 in `nudgekit-datastore`).
+
+## Code style
+
+- **Kotlin official code style** — `kotlin.code.style=official` is set in `gradle.properties`.
+- Prefer `val` over `var`. Use `data class` for value types. Avoid `!!`.
+- **No new external dependencies** without a clear reason in the PR description.
+- Keep `nudgekit-core` Android-free. Anything Android-specific belongs in `nudgekit-datastore` or `nudgekit-compose`.
+- Compose code: Material 3 only; use `Modifier` parameter on every public composable; avoid swallowing recomposition state.
+- Public types and composables get KDoc with `@param` / `@return` for non-obvious parameters.
+
+## Tests
+
+- Unit tests for `nudgekit-core` and `nudgekit-datastore` use JUnit 4, Truth, and `kotlinx-coroutines-test`. `:nudgekit-datastore` tests use `PreferenceDataStoreFactory.create` with `TemporaryFolder` — no Robolectric needed.
+- Compose UI tests are **not** set up yet. PRs adding the test harness (Robolectric or instrumented) are very welcome.
+- If you change a rule, add or update a corresponding `TipEvaluatorTest` case.
+- If you change persistence, add or update a `DataStoreTipManagerTest` case.
+
+## Proposing API changes
+
+NudgeKit's API surface is intentionally small. Before opening a PR that touches public types:
+
+1. Open a [feature request](.github/ISSUE_TEMPLATE/feature_request.md) describing the use case, proposed API, and whether it is breaking.
+2. Wait for maintainer feedback — large API changes may be redirected or postponed.
+3. Include a migration note in the PR description if the change is breaking.
+
+For small additions (a new built-in rule, a new optional parameter, a doc fix) you can skip the issue and open the PR directly — but link prior discussion if any exists.
+
+## Filing issues
+
+- **Bug?** Use [`.github/ISSUE_TEMPLATE/bug_report.md`](.github/ISSUE_TEMPLATE/bug_report.md). Include environment, repro steps, and a minimal code sample.
+- **Idea?** Use [`.github/ISSUE_TEMPLATE/feature_request.md`](.github/ISSUE_TEMPLATE/feature_request.md). A code sketch of the proposed API helps a lot.
+- **Security?** See [SECURITY.md](SECURITY.md) — do **not** open a public issue.
+
+## Pull requests
+
+1. Fork the repo and create a topic branch from `main`:
+
+   ```bash
+   git checkout -b feat/tip-groups
+   ```
+
+2. Make your changes. Keep commits focused; squash trivial fixups before pushing.
+3. Run the verification commands listed above. All five must pass on JDK 17.
+4. Update `CHANGELOG.md` under `[Unreleased]` if the change is user-visible.
+5. Open a PR using the [pull request template](.github/PULL_REQUEST_TEMPLATE.md). The checklist exists to save review round-trips — please fill it in.
+6. Reviewer feedback is usually within a few days. Be patient on a pre-1.0 alpha.
+
+## Commit messages
+
+Conventional commits are encouraged but not enforced:
+
+- `feat: …` — new user-facing feature
+- `fix: …` — bug fix
+- `docs: …` — documentation only
+- `refactor: …` — no behavior change
+- `test: …` — tests only
+- `chore: …` — tooling, build, repo meta
+
+Use the imperative mood ("add", not "added"). Reference issues in the body, not the subject.
+
+## Code of Conduct
+
+By participating in this project you agree to follow our [Code of Conduct](CODE_OF_CONDUCT.md). It is short and practical.
+
+## License
+
+By contributing you agree that your contributions are licensed under the Apache License 2.0 — the same license as the rest of the project. See [LICENSE](LICENSE).

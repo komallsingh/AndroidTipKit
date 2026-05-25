@@ -295,6 +295,11 @@ Near-term priorities:
 
 Contributions are welcome, especially around API review, Compose UI polish, tests, and documentation improvements.
 
+- Read [CONTRIBUTING.md](CONTRIBUTING.md) for setup, build commands, and the PR workflow.
+- Bug reports and feature requests use the [issue templates](.github/ISSUE_TEMPLATE/).
+- Security issues should follow [SECURITY.md](SECURITY.md) — please do not file them as public issues.
+- All participants are expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
+
 ## License
 
 NudgeKit is licensed under the Apache License 2.0. See [LICENSE](LICENSE).
