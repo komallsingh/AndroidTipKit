@@ -275,6 +275,6 @@ Open them in Android Studio's preview pane to iterate on styling.
 
 ## What's missing
 
-- **No Compose UI tests yet.** Coverage is preview-based for v0.1.
+- **Pure-UI Compose tests exist; managed-component tests are still deferred.** `InlineTip` and `TipBox` have Robolectric tests in `nudgekit-compose`; `ManagedInlineTip` / `ManagedTipBox` are still covered only by previews and the sample app — see [limitations.md](limitations.md).
 - **`collectAsState` not `collectAsStateWithLifecycle`** — see [limitations.md](limitations.md).
 - **`Start`/`End` positions** use a fixed `widthIn(max = 240.dp)`. Real popover positioning will come later.

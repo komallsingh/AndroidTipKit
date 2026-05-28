@@ -7,19 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0-alpha.1] - 2026-05-28
+
+Second alpha. Tooling, project hygiene, a Compose module split, and
+SDK-agnostic analytics hooks. **Still not published to Maven Central** — use
+the local modules (see the README). Public APIs are additive and
+source-compatible with `0.1.0-alpha.1`; the only change for managed-component
+users is an added Gradle dependency (see "Migration" below).
+
 ### Added
 - SDK-agnostic analytics hooks. New `TipAnalytics` interface and `NoOpTipAnalytics` object in `nudgekit-core` (`onTipShown`, `onTipDismissed`, `onTipActionClicked`, all with default no-op bodies). No analytics SDK is bundled and no networking is added — consumers forward events to Firebase / Mixpanel / a logger themselves.
-- `ManagedInlineTip` and `ManagedTipBox` gained an optional `analytics: TipAnalytics = NoOpTipAnalytics` parameter. `onTipShown` fires in lock-step with `markShown` (once per appearance), `onTipDismissed` on dismiss, and `onTipActionClicked` on the action button. Existing `onActionClick` behaviour is preserved.
+- `ManagedInlineTip` and `ManagedTipBox` gained an optional `analytics: TipAnalytics = NoOpTipAnalytics` parameter (appended last, so existing callers are unaffected). `onTipShown` fires in lock-step with `markShown` (once per appearance), `onTipDismissed` on dismiss, and `onTipActionClicked` on the action button. Existing `onActionClick` behaviour is preserved.
 - Sample app shows an "Analytics Events" section backed by a small `SampleTipAnalytics`, appending strings like `shown: use_filters` / `action: enable_notifications`.
-- `nudgekit-core` tests for `TipAnalytics`: `NoOpTipAnalytics` is a no-throwing `TipAnalytics`, default interface bodies allow partial overrides, and a recording fake captures events in order (5 tests).
 - New `nudgekit-compose-datastore` module that houses the state-aware managed components (`ManagedInlineTip`, `ManagedTipBox`). It depends on `nudgekit-core`, `nudgekit-datastore`, and `nudgekit-compose`, and is the future home for managed-component UI tests.
-- Initial Compose UI test coverage for `nudgekit-compose` using Robolectric (local JVM, no emulator): 11 tests for the pure-UI components `InlineTip` (title/message rendering, action-button visibility, dismiss/action callbacks) and `TipBox` (wrapped content, visible/hidden states, Top position). Managed components remain TODO.
-- CI now runs `./gradlew :nudgekit-compose:test` and builds `:nudgekit-compose-datastore`.
+- Initial Compose UI test coverage for `nudgekit-compose` using Robolectric (local JVM, no emulator): 11 tests for the pure-UI components `InlineTip` (title/message rendering, action-button visibility, dismiss/action callbacks) and `TipBox` (wrapped content, visible/hidden states, Top position).
+- `nudgekit-core` tests for `TipAnalytics`: `NoOpTipAnalytics` is a no-throwing `TipAnalytics`, default interface bodies allow partial overrides, and a recording fake captures events in order (5 tests).
+- GitHub Actions CI (`.github/workflows/ci.yml`): on push to `main` and PRs, runs on `ubuntu-latest` with Temurin JDK 17 + Gradle caching, executing `:nudgekit-core:test`, `:nudgekit-datastore:test`, `:nudgekit-compose:test`, building `:nudgekit-compose-datastore`, assembling the sample debug APK, and the full `build`. README shows a CI status badge.
+- Community / contributor files: issue templates (bug report, feature request), pull request template, `CONTRIBUTING.md`, `SECURITY.md`, and `CODE_OF_CONDUCT.md`.
+- `.gitattributes` for cross-platform line-ending normalization.
 
 ### Changed
 - **`nudgekit-compose` is now pure UI.** It no longer depends on `nudgekit-datastore`; consumers who only want `InlineTip` / `TipBox` no longer pull in DataStore transitively. `ManagedInlineTip` and `ManagedTipBox` moved to the new `nudgekit-compose-datastore` module. Both Compose modules share the Kotlin package `dev.nudgekit.compose`, so existing imports (e.g. `dev.nudgekit.compose.ManagedInlineTip`) are unchanged — only the Gradle dependency differs.
 - The sample app now depends on `nudgekit-compose-datastore` for the managed components.
 - `nudgekit-compose` disables the release unit-test variant; Compose UI tests run against the debug variant only (the `ui-test-manifest` test Activity is debug-only).
+
+### Migration from 0.1.0-alpha.1
+- If you use the managed components (`ManagedInlineTip` / `ManagedTipBox`), add the new module dependency: `implementation(project(":nudgekit-compose-datastore"))`. Imports are unchanged — they remain in package `dev.nudgekit.compose`.
+- Pure-UI-only consumers can keep depending on just `nudgekit-compose`, which no longer drags in DataStore.
+
+### Tests
+- Project total: **126 tests, 0 failures** — 78 in `nudgekit-core`, 37 in `nudgekit-datastore`, 11 in `nudgekit-compose`. Verified on JDK 17.
+
+### Known Limitations
+- Not published to Maven Central yet — use the local modules (see the README).
+- Managed-component UI tests (`ManagedInlineTip` / `ManagedTipBox`) are still deferred; they need a deterministic DataStore + Compose test harness. Pure-UI components are covered, and the managed components are exercised by the sample app.
+- `TipBox` positioning is intentionally simple (Start/End use a fixed `widthIn(max = 240.dp)`), not pixel-perfect.
+- Managed components observe all counters via `observeCounters()` and use `collectAsState` instead of `collectAsStateWithLifecycle`.
+- Maven publishing is not configured.
 
 ## [0.1.0-alpha.1] - 2026-05-25
 

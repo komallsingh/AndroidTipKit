@@ -12,10 +12,11 @@ NudgeKit is a Compose-first Android library for contextual tips, feature discove
 
 | Module | Purpose | Android dependency? |
 |---|---|:---:|
-| `nudgekit-core` | Pure Kotlin: `Tip`, `TipRule`, `TipState`, `TipCounters`, `TipEvaluator`, `TipManager` | No (pure JVM) |
+| `nudgekit-core` | Pure Kotlin: `Tip`, `TipRule`, `TipState`, `TipCounters`, `TipEvaluator`, `TipManager`, `TipAnalytics` | No (pure JVM) |
 | `nudgekit-datastore` | `DataStoreTipManager` — AndroidX DataStore Preferences implementation | Yes |
-| `nudgekit-compose` | `InlineTip`, `TipBox`, `ManagedInlineTip`, `ManagedTipBox`, styling | Yes |
-| `sample` | Demo app exercising the full MVP | Yes |
+| `nudgekit-compose` | Pure UI: `InlineTip`, `TipBox`, `TipPosition`, styling | Yes |
+| `nudgekit-compose-datastore` | Managed components: `ManagedInlineTip`, `ManagedTipBox` | Yes |
+| `sample` | Demo app exercising the full library | Yes |
 
 Documentation lives under [`docs/`](docs/). The [README](README.md) is the entry point.
 
@@ -65,23 +66,25 @@ Documentation lives under [`docs/`](docs/). The [README](README.md) is the entry
 # Unit tests
 ./gradlew :nudgekit-core:test
 ./gradlew :nudgekit-datastore:test
+./gradlew :nudgekit-compose:test
 
 # Module + sample builds
 ./gradlew :nudgekit-compose:build
+./gradlew :nudgekit-compose-datastore:build
 ./gradlew :sample:assembleDebug
 
 # Full project
 ./gradlew build
 ```
 
-Expected: all five tasks `BUILD SUCCESSFUL`, **110 tests, 0 failures** (73 in `nudgekit-core`, 37 in `nudgekit-datastore`).
+Expected: all tasks `BUILD SUCCESSFUL`, **126 tests, 0 failures** (78 in `nudgekit-core`, 37 in `nudgekit-datastore`, 11 in `nudgekit-compose`).
 
 ## Code style
 
 - **Kotlin official code style** — `kotlin.code.style=official` is set in `gradle.properties`.
 - Prefer `val` over `var`. Use `data class` for value types. Avoid `!!`.
 - **No new external dependencies** without a clear reason in the PR description.
-- Keep `nudgekit-core` Android-free. Anything Android-specific belongs in `nudgekit-datastore` or `nudgekit-compose`.
+- Keep `nudgekit-core` Android-free. Anything Android-specific belongs in `nudgekit-datastore`, `nudgekit-compose`, or `nudgekit-compose-datastore`. Keep `nudgekit-compose` pure UI — code that touches DataStore goes in `nudgekit-compose-datastore`.
 - Compose code: Material 3 only; use `Modifier` parameter on every public composable; avoid swallowing recomposition state.
 - Public types and composables get KDoc with `@param` / `@return` for non-obvious parameters.
 

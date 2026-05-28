@@ -2,22 +2,24 @@
 
 Planned work, in roughly the order we expect to tackle it. Subject to change based on feedback.
 
-## v0.1 — MVP (current)
+## v0.1 — MVP (shipped as 0.1.0-alpha.1)
 
 - [x] `nudgekit-core`: `Tip`, `TipRule` (7 variants), `TipState`, `TipCounters`, `TipContext`, `TipDecision`, `TipHideReason`, `TipEvaluator`, `TipManager`.
 - [x] `nudgekit-datastore`: `DataStoreTipManager` with snapshot reads, reactive flows, evaluation helpers.
 - [x] `nudgekit-compose`: `InlineTip`, `TipBox`, `ManagedInlineTip`, `ManagedTipBox`, `TipPosition`, `NudgeTipDefaults`, `NudgeTipColors`, previews.
 - [x] Working sample app exercising all of the above.
-- [x] 110 passing unit tests across `nudgekit-core` and `nudgekit-datastore`.
 
-## v0.2 — Hardening and publishing
+## v0.2 — Hardening (current, 0.2.0-alpha.1)
 
-- [ ] Maven Central publishing (`maven-publish` plugin, signing config, staging workflow).
-- [ ] CI pipeline (GitHub Actions): build, test, lint, sample APK assembly.
+- [x] CI pipeline (GitHub Actions): build, test, lint, sample APK assembly.
 - [x] Split `nudgekit-compose` so pure-UI consumers don't pull in DataStore. Managed components moved to a new `nudgekit-compose-datastore` module; `nudgekit-compose` no longer depends on `nudgekit-datastore`.
-- [ ] Compose UI tests for the managed variants (`ManagedInlineTip`, `ManagedTipBox`) in `nudgekit-compose-datastore`. (Pure-UI tests for `InlineTip` / `TipBox` already exist.)
+- [x] Initial Compose UI tests for the pure-UI components (`InlineTip`, `TipBox`).
+- [x] SDK-agnostic `TipAnalytics` hooks wired into the managed components.
+- [x] 126 passing tests across `nudgekit-core` (78), `nudgekit-datastore` (37), and `nudgekit-compose` (11).
+- [ ] Compose UI tests for the managed variants (`ManagedInlineTip`, `ManagedTipBox`) in `nudgekit-compose-datastore`.
 - [ ] Adopt `collectAsStateWithLifecycle` as opt-in via a parameter or separate artifact.
 - [ ] Accessibility audit of all UI components (touch targets, content descriptions, dynamic type, dark mode contrast).
+- [ ] Maven Central publishing (`maven-publish` plugin, signing config, staging workflow).
 
 ## v0.3 — UX and ergonomics
 

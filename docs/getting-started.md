@@ -6,7 +6,8 @@ This page is the shortest path to trying the current NudgeKit MVP.
 
 - `nudgekit-core`: Android-free models and rule engine
 - `nudgekit-datastore`: Android DataStore persistence
-- `nudgekit-compose`: Compose UI components
+- `nudgekit-compose`: pure Compose UI components (`InlineTip`, `TipBox`)
+- `nudgekit-compose-datastore`: managed components (`ManagedInlineTip`, `ManagedTipBox`)
 - `sample`: runnable example app
 
 ## Install From Source
@@ -22,10 +23,12 @@ For now, point your app's Gradle build at the local modules:
 include(":nudgekit-core")
 include(":nudgekit-datastore")
 include(":nudgekit-compose")
+include(":nudgekit-compose-datastore")
 
 project(":nudgekit-core").projectDir = file("../NudgeKit/nudgekit-core")
 project(":nudgekit-datastore").projectDir = file("../NudgeKit/nudgekit-datastore")
 project(":nudgekit-compose").projectDir = file("../NudgeKit/nudgekit-compose")
+project(":nudgekit-compose-datastore").projectDir = file("../NudgeKit/nudgekit-compose-datastore")
 ```
 
 ```kotlin
@@ -33,7 +36,9 @@ project(":nudgekit-compose").projectDir = file("../NudgeKit/nudgekit-compose")
 dependencies {
     implementation(project(":nudgekit-core"))
     implementation(project(":nudgekit-datastore"))
-    implementation(project(":nudgekit-compose"))
+    implementation(project(":nudgekit-compose"))            // pure UI
+    // Required for the managed components (ManagedInlineTip / ManagedTipBox):
+    implementation(project(":nudgekit-compose-datastore"))
 }
 ```
 
