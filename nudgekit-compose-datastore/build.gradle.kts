@@ -1,19 +1,18 @@
 plugins {
-    alias(libs.plugins.android.application)
+    alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
 }
 
 android {
-    namespace = "dev.nudgekit.sample"
+    // Distinct Android namespace (governs the generated R/BuildConfig class).
+    // The Kotlin package of the components stays `dev.nudgekit.compose` so that
+    // consumer imports (e.g. `dev.nudgekit.compose.ManagedInlineTip`) are unchanged.
+    namespace = "dev.nudgekit.compose.datastore"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "dev.nudgekit.sample"
         minSdk = 24
-        targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
     }
 
     compileOptions {
@@ -31,16 +30,13 @@ android {
 }
 
 dependencies {
-    implementation(project(":nudgekit-core"))
-    implementation(project(":nudgekit-datastore"))
-    implementation(project(":nudgekit-compose"))
-    implementation(project(":nudgekit-compose-datastore"))
+    api(project(":nudgekit-core"))
+    api(project(":nudgekit-datastore"))
+    api(project(":nudgekit-compose"))
 
     val composeBom = platform(libs.compose.bom)
     implementation(composeBom)
     implementation(libs.compose.ui)
     implementation(libs.compose.material3)
-    implementation(libs.compose.ui.tooling.preview)
-    debugImplementation(libs.compose.ui.tooling)
-    implementation(libs.activity.compose)
+    implementation(libs.coroutines.android)
 }

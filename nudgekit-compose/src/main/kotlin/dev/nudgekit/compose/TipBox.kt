@@ -22,8 +22,8 @@ import dev.nudgekit.core.Tip
  * an [InlineTip] adjacent to it based on [position].
  *
  * This is a **pure UI component** — visibility is controlled by the [visible]
- * flag. For a state-aware version that integrates with [DataStoreTipManager],
- * use [ManagedTipBox].
+ * flag. For a state-aware version that integrates with DataStore persistence,
+ * use `ManagedTipBox` from the `nudgekit-compose-datastore` module.
  *
  * For [TipPosition.Top] and [TipPosition.Bottom], a vertical [Column] layout
  * is used and the tip animates in/out. For [TipPosition.Start] and

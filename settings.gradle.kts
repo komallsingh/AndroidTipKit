@@ -20,4 +20,5 @@ rootProject.name = "NudgeKit"
 include(":nudgekit-core")
 include(":nudgekit-datastore")
 include(":nudgekit-compose")
+include(":nudgekit-compose-datastore")
 include(":sample")

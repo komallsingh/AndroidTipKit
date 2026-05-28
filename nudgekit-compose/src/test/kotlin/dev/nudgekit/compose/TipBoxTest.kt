@@ -87,12 +87,15 @@ class TipBoxTest {
 }
 
 /*
- * TODO(v0.2): add tests for ManagedInlineTip and ManagedTipBox.
+ * Note: ManagedInlineTip and ManagedTipBox now live in the
+ * :nudgekit-compose-datastore module, which is the future home for their
+ * tests.
  *
- * Those require constructing a DataStoreTipManager backed by
- * PreferenceDataStoreFactory + TemporaryFolder (mirroring the
- * :nudgekit-datastore test harness) and coordinating DataStore writes
- * with the Compose mainClock via `composeRule.waitUntil { … }`.
+ * TODO(v0.2): add tests for the managed components there. Those require
+ * constructing a DataStoreTipManager backed by PreferenceDataStoreFactory
+ * + TemporaryFolder (mirroring the :nudgekit-datastore test harness) and
+ * coordinating DataStore writes with the Compose mainClock via
+ * `composeRule.waitUntil { … }`.
  *
  * Deferred for the v0.1.x alpha to keep the initial Compose test setup
  * minimal and deterministic. Managed components are exercised end-to-end

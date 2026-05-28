@@ -21,7 +21,7 @@ Test counts:
 
 ## Module structure
 
-- **`nudgekit-compose` depends on `nudgekit-datastore`.** Even if you only want the pure-UI components (`InlineTip`, `TipBox`), you currently pull in DataStore transitively. A future release will split managed components into a separate artifact (e.g. `nudgekit-compose-datastore`).
+- **Managed components live in `nudgekit-compose-datastore`.** `nudgekit-compose` is now pure UI and depends only on `nudgekit-core` — it no longer pulls in DataStore. The state-aware `ManagedInlineTip` and `ManagedTipBox` moved to the new `nudgekit-compose-datastore` module (which depends on `nudgekit-core`, `nudgekit-datastore`, and `nudgekit-compose`). Both Compose modules share the Kotlin package `dev.nudgekit.compose`, so consumer imports are unchanged.
 
 ## Compose components
 

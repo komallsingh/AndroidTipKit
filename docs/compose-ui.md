@@ -1,13 +1,33 @@
 # Compose UI
 
-`nudgekit-compose` ships four composables and a small styling API.
+The Compose layer is split across two modules so that pure-UI consumers
+don't have to pull in DataStore:
 
-| Composable | Pure UI? | Visibility source |
-|------------|:---:|---|
-| `InlineTip` | yes | always rendered (caller controls visibility) |
-| `TipBox` | yes | controlled by the `visible: Boolean` parameter |
-| `ManagedInlineTip` | no | resolved automatically from a `DataStoreTipManager` |
-| `ManagedTipBox` | no | resolved automatically from a `DataStoreTipManager` |
+- **`nudgekit-compose`** — pure UI only. Depends on `nudgekit-core`, **not**
+  on `nudgekit-datastore`. Contains `InlineTip`, `TipBox`, `TipPosition`,
+  `NudgeTipDefaults`, `NudgeTipColors`, and previews.
+- **`nudgekit-compose-datastore`** — the state-aware managed components.
+  Depends on `nudgekit-core`, `nudgekit-datastore`, and `nudgekit-compose`.
+  Contains `ManagedInlineTip` and `ManagedTipBox`.
+
+Both modules share the Kotlin package `dev.nudgekit.compose`, so imports
+like `import dev.nudgekit.compose.ManagedInlineTip` are unchanged — only
+the Gradle dependency you add differs.
+
+| Composable | Module | Pure UI? | Visibility source |
+|------------|--------|:---:|---|
+| `InlineTip` | `nudgekit-compose` | yes | always rendered (caller controls visibility) |
+| `TipBox` | `nudgekit-compose` | yes | controlled by the `visible: Boolean` parameter |
+| `ManagedInlineTip` | `nudgekit-compose-datastore` | no | resolved automatically from a `DataStoreTipManager` |
+| `ManagedTipBox` | `nudgekit-compose-datastore` | no | resolved automatically from a `DataStoreTipManager` |
+
+```kotlin
+// Pure UI only — no DataStore on the classpath
+implementation(project(":nudgekit-compose"))
+
+// Managed components — transitively pulls in compose + datastore + core
+implementation(project(":nudgekit-compose-datastore"))
+```
 
 ## `InlineTip`
 

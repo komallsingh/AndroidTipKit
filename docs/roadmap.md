@@ -14,8 +14,8 @@ Planned work, in roughly the order we expect to tackle it. Subject to change bas
 
 - [ ] Maven Central publishing (`maven-publish` plugin, signing config, staging workflow).
 - [ ] CI pipeline (GitHub Actions): build, test, lint, sample APK assembly.
-- [ ] Compose UI tests (Robolectric or instrumented) for `InlineTip`, `TipBox`, and the managed variants.
-- [ ] Split `nudgekit-compose` so pure-UI consumers don't pull in DataStore. Possible shapes: `nudgekit-compose-core` (pure UI) + `nudgekit-compose-datastore` (managed components), or a single module with `compileOnly` DataStore + an opt-in artifact.
+- [x] Split `nudgekit-compose` so pure-UI consumers don't pull in DataStore. Managed components moved to a new `nudgekit-compose-datastore` module; `nudgekit-compose` no longer depends on `nudgekit-datastore`.
+- [ ] Compose UI tests for the managed variants (`ManagedInlineTip`, `ManagedTipBox`) in `nudgekit-compose-datastore`. (Pure-UI tests for `InlineTip` / `TipBox` already exist.)
 - [ ] Adopt `collectAsStateWithLifecycle` as opt-in via a parameter or separate artifact.
 - [ ] Accessibility audit of all UI components (touch targets, content descriptions, dynamic type, dark mode contrast).
 

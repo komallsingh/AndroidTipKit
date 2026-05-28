@@ -29,7 +29,8 @@ NudgeKit provides one small library surface for those concerns:
 
 - `nudgekit-core`: Android-free rule engine and models
 - `nudgekit-datastore`: DataStore-backed persistence and evaluation helpers
-- `nudgekit-compose`: Compose UI components
+- `nudgekit-compose`: pure Compose UI components (`InlineTip`, `TipBox`) — no DataStore dependency
+- `nudgekit-compose-datastore`: state-aware managed components (`ManagedInlineTip`, `ManagedTipBox`)
 - `sample`: a demo app for the current MVP
 
 ## Quick Example
@@ -75,7 +76,8 @@ Planned future coordinates:
 ```kotlin
 implementation("dev.nudgekit:nudgekit-core:<version>")
 implementation("dev.nudgekit:nudgekit-datastore:<version>")
-implementation("dev.nudgekit:nudgekit-compose:<version>")
+implementation("dev.nudgekit:nudgekit-compose:<version>")            // pure UI
+implementation("dev.nudgekit:nudgekit-compose-datastore:<version>")  // managed components
 ```
 
 For now, use the modules locally in a multi-module Gradle build:
@@ -85,18 +87,23 @@ For now, use the modules locally in a multi-module Gradle build:
 include(":nudgekit-core")
 include(":nudgekit-datastore")
 include(":nudgekit-compose")
+include(":nudgekit-compose-datastore")
 
 project(":nudgekit-core").projectDir = file("../NudgeKit/nudgekit-core")
 project(":nudgekit-datastore").projectDir = file("../NudgeKit/nudgekit-datastore")
 project(":nudgekit-compose").projectDir = file("../NudgeKit/nudgekit-compose")
+project(":nudgekit-compose-datastore").projectDir = file("../NudgeKit/nudgekit-compose-datastore")
 ```
 
 ```kotlin
 // app/build.gradle.kts
 dependencies {
-    implementation(project(":nudgekit-core"))
-    implementation(project(":nudgekit-datastore"))
+    // Pure UI only (InlineTip, TipBox) — does not pull in DataStore:
     implementation(project(":nudgekit-compose"))
+
+    // Managed components (ManagedInlineTip, ManagedTipBox) — transitively
+    // pulls in nudgekit-compose, nudgekit-datastore, and nudgekit-core:
+    implementation(project(":nudgekit-compose-datastore"))
 }
 ```
 
@@ -266,7 +273,7 @@ If you only need a tooltip, use a tooltip. If you need "show the right nudge at 
 
 - Compose UI tests cover the pure-UI components (`InlineTip`, `TipBox`); managed components are not yet covered by automated tests
 - `TipBox` positioning is intentionally simple, not pixel-perfect
-- `nudgekit-compose` currently depends on `nudgekit-datastore`
+- managed components (`ManagedInlineTip`, `ManagedTipBox`) live in `nudgekit-compose-datastore`; `nudgekit-compose` itself is now pure UI with no DataStore dependency
 - managed components observe all counters through `observeCounters()`
 - managed components use `collectAsState`, not `collectAsStateWithLifecycle`
 - production apps should use one shared `DataStoreTipManager` instance
@@ -276,8 +283,7 @@ If you only need a tooltip, use a tooltip. If you need "show the right nudge at 
 
 Near-term priorities:
 
-- decouple `nudgekit-compose` from the DataStore implementation
-- add Compose UI tests for the managed components (`ManagedInlineTip`, `ManagedTipBox`)
+- add Compose UI tests for the managed components (`ManagedInlineTip`, `ManagedTipBox`) in `nudgekit-compose-datastore`
 - improve `TipBox` positioning and anchoring
 - tighten managed observation granularity
 - prepare publishing and release packaging

@@ -44,7 +44,6 @@ androidComponents {
 
 dependencies {
     api(project(":nudgekit-core"))
-    implementation(project(":nudgekit-datastore"))
 
     val composeBom = platform(libs.compose.bom)
     implementation(composeBom)
