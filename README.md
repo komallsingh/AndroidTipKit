@@ -264,7 +264,7 @@ If you only need a tooltip, use a tooltip. If you need "show the right nudge at 
 
 ## Current Limitations
 
-- no Compose UI tests yet
+- Compose UI tests cover the pure-UI components (`InlineTip`, `TipBox`); managed components are not yet covered by automated tests
 - `TipBox` positioning is intentionally simple, not pixel-perfect
 - `nudgekit-compose` currently depends on `nudgekit-datastore`
 - managed components observe all counters through `observeCounters()`
@@ -277,7 +277,7 @@ If you only need a tooltip, use a tooltip. If you need "show the right nudge at 
 Near-term priorities:
 
 - decouple `nudgekit-compose` from the DataStore implementation
-- add Compose UI tests
+- add Compose UI tests for the managed components (`ManagedInlineTip`, `ManagedTipBox`)
 - improve `TipBox` positioning and anchoring
 - tighten managed observation granularity
 - prepare publishing and release packaging

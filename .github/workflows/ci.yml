@@ -43,6 +43,9 @@ jobs:
       - name: Test — nudgekit-datastore
         run: ./gradlew :nudgekit-datastore:test
 
+      - name: Test — nudgekit-compose (Robolectric UI)
+        run: ./gradlew :nudgekit-compose:test
+
       - name: Build — nudgekit-compose
         run: ./gradlew :nudgekit-compose:build
 
