@@ -4,7 +4,7 @@ NudgeKit is an MVP. This document is the honest list of what does not work yet, 
 
 ## Distribution
 
-- **Not published to Maven Central.** Coordinates like `dev.nudgekit:nudgekit-core:0.1.0` are placeholders. Use the modules locally for now (Git submodule + `includeBuild`, or vendored sources).
+- **Not published to Maven Central.** Coordinates like `io.github.abdullajon1881:nudgekit-core:0.2.0-alpha.1` are placeholders. Use the modules locally for now (Git submodule + `includeBuild`, or vendored sources).
 - **No version tags.** No semantic-versioning guarantees yet. APIs may change before the first published release.
 
 ## Testing

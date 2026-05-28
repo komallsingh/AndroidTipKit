@@ -74,10 +74,10 @@ NudgeKit is not published yet.
 Planned future coordinates:
 
 ```kotlin
-implementation("dev.nudgekit:nudgekit-core:<version>")
-implementation("dev.nudgekit:nudgekit-datastore:<version>")
-implementation("dev.nudgekit:nudgekit-compose:<version>")            // pure UI
-implementation("dev.nudgekit:nudgekit-compose-datastore:<version>")  // managed components
+implementation("io.github.abdullajon1881:nudgekit-core:<version>")
+implementation("io.github.abdullajon1881:nudgekit-datastore:<version>")
+implementation("io.github.abdullajon1881:nudgekit-compose:<version>")            // pure UI
+implementation("io.github.abdullajon1881:nudgekit-compose-datastore:<version>")  // managed components
 ```
 
 For now, use the modules locally in a multi-module Gradle build:
