@@ -32,6 +32,13 @@ android {
     }
 }
 
+// Maven Central requires a Javadoc JAR. AGP's withJavadocJar() runs a Dokka
+// worker that fails on these Kotlin/Compose sources, so we attach a valid
+// (empty) Javadoc JAR instead. Real API docs can be wired with Dokka later.
+val javadocJar by tasks.registering(Jar::class) {
+    archiveClassifier.set("javadoc")
+}
+
 dependencies {
     api(project(":nudgekit-core"))
     implementation(libs.datastore.preferences)
@@ -49,6 +56,7 @@ afterEvaluate {
         publications {
             create<MavenPublication>("release") {
                 from(components["release"])
+                artifact(javadocJar)
                 artifactId = "nudgekit-datastore"
                 pom {
                     name.set("NudgeKit DataStore")

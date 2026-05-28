@@ -92,7 +92,9 @@ Coordinates come from `gradle.properties` (`nudgekitGroup=io.github.abdullajon18
 ```
 
 This produces, per module, the main artifact (`.aar` / `.jar`), a `-sources.jar`,
-Gradle module metadata (`.module`), and a `.pom`.
+a `-javadoc.jar` (required by Maven Central — the Android modules attach a valid
+empty one for now; `nudgekit-core` uses `withJavadocJar()`), Gradle module
+metadata (`.module`), and a `.pom`.
 
 **Signing** is wired with the `signing` plugin using in-memory PGP keys, and is
 **off unless you supply a key** — normal builds and CI never need one. To test

@@ -11,6 +11,9 @@ java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
     withSourcesJar()
+    // Javadoc JAR for Maven Central readiness. Sources are Kotlin, so the
+    // jar is effectively empty but valid — Central only requires its presence.
+    withJavadocJar()
 }
 
 kotlin {
