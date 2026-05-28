@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
     `maven-publish`
+    signing
 }
 
 group = providers.gradleProperty("nudgekitGroup").get()
@@ -57,5 +58,23 @@ publishing {
                 }
             }
         }
+    }
+}
+
+// In-memory PGP signing, gated so it only activates when key material is
+// supplied (via -P / ORG_GRADLE_PROJECT_ env vars). Without keys, signing is
+// skipped entirely so normal builds and CI stay green. No keyring on disk.
+signing {
+    val signingKey = providers.gradleProperty("signingInMemoryKey").orNull
+    val signingPassword = providers.gradleProperty("signingInMemoryKeyPassword").orNull
+    isRequired = signingKey != null
+    if (signingKey != null) {
+        val signingKeyId = providers.gradleProperty("signingInMemoryKeyId").orNull
+        if (signingKeyId != null) {
+            useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
+        } else {
+            useInMemoryPgpKeys(signingKey, signingPassword)
+        }
+        sign(publishing.publications)
     }
 }

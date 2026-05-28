@@ -79,6 +79,37 @@ Documentation lives under [`docs/`](docs/). The [README](README.md) is the entry
 
 Expected: all tasks `BUILD SUCCESSFUL`, **126 tests, 0 failures** (78 in `nudgekit-core`, 37 in `nudgekit-datastore`, 11 in `nudgekit-compose`).
 
+## Publishing (maintainers, dry-run)
+
+NudgeKit is **not** published to Maven Central yet. The four library modules are
+configured for a local dry-run only — `sample` is never published.
+
+Coordinates come from `gradle.properties` (`nudgekitGroup=io.github.abdullajon1881`,
+`nudgekitVersion`). Generate artifacts into your local Maven repo (`~/.m2`):
+
+```bash
+./gradlew publishToMavenLocal
+```
+
+This produces, per module, the main artifact (`.aar` / `.jar`), a `-sources.jar`,
+Gradle module metadata (`.module`), and a `.pom`.
+
+**Signing** is wired with the `signing` plugin using in-memory PGP keys, and is
+**off unless you supply a key** — normal builds and CI never need one. To test
+the signed path locally, pass an ASCII-armored private key and its passphrase:
+
+```bash
+./gradlew publishToMavenLocal \
+  -PsigningInMemoryKey="$(cat my-armored-key.asc)" \
+  -PsigningInMemoryKeyPassword="<passphrase>"
+  # optional: -PsigningInMemoryKeyId="<subkey id>"
+```
+
+Equivalent `ORG_GRADLE_PROJECT_signingInMemoryKey` / `...Password` env vars work
+too (useful for CI secrets). When supplied, `.asc` signatures are generated
+alongside every artifact. **Never commit keys or passphrases.** GPG key
+generation and Maven Central upload are deferred to a later phase.
+
 ## Code style
 
 - **Kotlin official code style** — `kotlin.code.style=official` is set in `gradle.properties`.

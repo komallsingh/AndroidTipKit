@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
     `maven-publish`
+    signing
 }
 
 group = providers.gradleProperty("nudgekitGroup").get()
@@ -85,6 +86,23 @@ afterEvaluate {
                     }
                 }
             }
+        }
+    }
+
+    // In-memory PGP signing, gated so it only activates when key material is
+    // supplied. Without keys, signing is skipped so builds/CI stay green.
+    signing {
+        val signingKey = providers.gradleProperty("signingInMemoryKey").orNull
+        val signingPassword = providers.gradleProperty("signingInMemoryKeyPassword").orNull
+        isRequired = signingKey != null
+        if (signingKey != null) {
+            val signingKeyId = providers.gradleProperty("signingInMemoryKeyId").orNull
+            if (signingKeyId != null) {
+                useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
+            } else {
+                useInMemoryPgpKeys(signingKey, signingPassword)
+            }
+            sign(publishing.publications)
         }
     }
 }
