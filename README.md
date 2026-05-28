@@ -11,9 +11,10 @@ Status:
 - MVP implemented (latest: 0.2.0-alpha.1)
 - 126 unit tests passing in a correctly configured environment
 - sample app included
-- not published yet
-- Maven publishing not configured yet
-- CI not configured yet
+- GitHub Actions CI configured
+- local Maven publishing dry-run configured (`publishToMavenLocal`)
+- not published to Maven Central yet
+- Maven Central upload / signing credentials not configured yet
 
 ## Screenshots
 
