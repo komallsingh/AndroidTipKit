@@ -112,6 +112,11 @@ too (useful for CI secrets). When supplied, `.asc` signatures are generated
 alongside every artifact. **Never commit keys or passphrases.** GPG key
 generation and Maven Central upload are deferred to a later phase.
 
+The remaining steps to actually publish to Maven Central (accounts, namespace
+verification, real GPG key, GitHub Secrets, upload strategy, and the pre-publish
+checklist) are documented in the maintainer runbook:
+[docs/maintainers/maven-central-phase-c.md](docs/maintainers/maven-central-phase-c.md).
+
 ## Code style
 
 - **Kotlin official code style** — `kotlin.code.style=official` is set in `gradle.properties`.
