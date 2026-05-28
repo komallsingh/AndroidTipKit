@@ -2,7 +2,11 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
+    `maven-publish`
 }
+
+group = providers.gradleProperty("nudgekitGroup").get()
+version = providers.gradleProperty("nudgekitVersion").get()
 
 android {
     namespace = "dev.nudgekit.compose"
@@ -29,6 +33,12 @@ android {
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
+        }
+    }
+
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
         }
     }
 }
@@ -62,4 +72,42 @@ dependencies {
     // ui-test-manifest provides the empty test Activity used by createComposeRule()
     // and must be in debug configuration so Robolectric picks it up.
     debugImplementation(libs.compose.ui.test.manifest)
+}
+
+// The Android `release` component only exists after evaluation.
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("release") {
+                from(components["release"])
+                artifactId = "nudgekit-compose"
+                pom {
+                    name.set("NudgeKit Compose")
+                    description.set(
+                        "Pure Material 3 Compose UI for NudgeKit — InlineTip, TipBox, " +
+                            "and styling. No DataStore dependency.",
+                    )
+                    url.set("https://github.com/Abdullajon1881/AndroidTipKit")
+                    licenses {
+                        license {
+                            name.set("The Apache License, Version 2.0")
+                            url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
+                        }
+                    }
+                    developers {
+                        developer {
+                            id.set("Abdullajon1881")
+                            name.set("Abdullajon1881")
+                            url.set("https://github.com/Abdullajon1881")
+                        }
+                    }
+                    scm {
+                        url.set("https://github.com/Abdullajon1881/AndroidTipKit")
+                        connection.set("scm:git:https://github.com/Abdullajon1881/AndroidTipKit.git")
+                        developerConnection.set("scm:git:ssh://git@github.com/Abdullajon1881/AndroidTipKit.git")
+                    }
+                }
+            }
+        }
+    }
 }

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Maven publishing **dry-run** configuration. The four library modules (`nudgekit-core`, `nudgekit-datastore`, `nudgekit-compose`, `nudgekit-compose-datastore`) apply `maven-publish` with shared coordinates `dev.nudgekit:<module>:0.2.0-alpha.1` (group/version centralized in `gradle.properties`), sources JARs, and full POM metadata (name, description, URL, Apache-2.0 license, developer, SCM). `./gradlew publishToMavenLocal` generates artifacts into `~/.m2`. The `sample` app is intentionally not published.
+- **Not** configured: GPG signing and Maven Central / Sonatype upload — both intentionally deferred to later phases. Nothing is published to any remote repository.
+
 ## [0.2.0-alpha.1] - 2026-05-28
 
 Second alpha. Tooling, project hygiene, a Compose module split, and
