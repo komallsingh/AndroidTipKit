@@ -160,13 +160,32 @@ interface TipManager {
 
 A concrete implementation lives in [`nudgekit-datastore`](datastore.md). The interface itself stays Android-free.
 
+## `TipAnalytics`
+
+An SDK-agnostic hook for observing tip lifecycle events. It lives in `nudgekit-core` and pulls in no dependencies:
+
+```kotlin
+interface TipAnalytics {
+    fun onTipShown(tip: Tip) {}
+    fun onTipDismissed(tip: Tip) {}
+    fun onTipActionClicked(tip: Tip) {}
+}
+
+object NoOpTipAnalytics : TipAnalytics
+```
+
+- Every method has a default no-op body, so an implementation overrides only the events it cares about.
+- NudgeKit bundles **no** analytics SDK and makes **no** network calls. You forward events to Firebase, Mixpanel, Amplitude, a logger, or anything else yourself.
+- Managed components (`ManagedInlineTip`, `ManagedTipBox`) accept an `analytics` parameter (default `NoOpTipAnalytics`) and call the hooks once per real user-facing event. See [compose-ui.md](compose-ui.md#analytics).
+- Pure UI components (`InlineTip`, `TipBox`) stay callback-based; bridge their callbacks to analytics yourself if you use them directly.
+
 ## Managed UI
 
-`nudgekit-compose` provides `ManagedInlineTip` and `ManagedTipBox`. They glue everything together:
+`nudgekit-compose-datastore` provides `ManagedInlineTip` and `ManagedTipBox`. They glue everything together:
 
 1. Subscribe to `observeTipState` and `observeCounters`.
 2. Call `shouldShow` to decide visibility.
-3. Call `markShown` exactly once per appearance.
-4. Call `dismiss` when the user taps the close button.
+3. Call `markShown` exactly once per appearance (and `TipAnalytics.onTipShown` alongside it).
+4. Call `dismiss` (and `TipAnalytics.onTipDismissed`) when the user taps the close button.
 
 You don't have to use the managed components — `InlineTip` and `TipBox` are pure UI and work with any visibility source. See [compose-ui.md](compose-ui.md).

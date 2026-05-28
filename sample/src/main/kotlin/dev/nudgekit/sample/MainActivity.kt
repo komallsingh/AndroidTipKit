@@ -22,6 +22,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -29,6 +31,7 @@ import dev.nudgekit.compose.ManagedInlineTip
 import dev.nudgekit.compose.ManagedTipBox
 import dev.nudgekit.compose.TipPosition
 import dev.nudgekit.core.Tip
+import dev.nudgekit.core.TipAnalytics
 import dev.nudgekit.core.TipRule
 import dev.nudgekit.datastore.DataStoreTipManager
 import kotlinx.coroutines.launch
@@ -80,12 +83,33 @@ private val notificationTip = Tip(
     ),
 )
 
+// ─── Sample analytics ───────────────────────────────────────────────
+//
+// A tiny, SDK-agnostic TipAnalytics implementation. It just forwards each
+// event as a human-readable string to a callback — here we append it to a
+// Compose state list and render it on screen. A real app would forward to
+// Firebase / Mixpanel / Amplitude / a logger instead. NudgeKit bundles no
+// analytics dependency.
+private class SampleTipAnalytics(
+    private val onEvent: (String) -> Unit,
+) : TipAnalytics {
+    override fun onTipShown(tip: Tip) = onEvent("shown: ${tip.id}")
+    override fun onTipDismissed(tip: Tip) = onEvent("dismissed: ${tip.id}")
+    override fun onTipActionClicked(tip: Tip) = onEvent("action: ${tip.id}")
+}
+
 // ─── Main screen ───────────────────────────────────────────────────
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun NudgeKitSampleApp(manager: DataStoreTipManager) {
     val scope = rememberCoroutineScope()
+
+    // Most-recent-first log of analytics events, rendered in the UI below.
+    val analyticsEvents = remember { mutableStateListOf<String>() }
+    val analytics = remember {
+        SampleTipAnalytics { event -> analyticsEvents.add(0, event) }
+    }
 
     Scaffold(
         topBar = {
@@ -112,6 +136,7 @@ private fun NudgeKitSampleApp(manager: DataStoreTipManager) {
                 manager = manager,
                 modifier = Modifier.fillMaxWidth(),
                 onActionClick = { /* navigate to filters */ },
+                analytics = analytics,
             )
 
             HorizontalDivider()
@@ -129,6 +154,7 @@ private fun NudgeKitSampleApp(manager: DataStoreTipManager) {
                 position = TipPosition.Bottom,
                 modifier = Modifier.fillMaxWidth(),
                 onActionClick = { /* open notification settings */ },
+                analytics = analytics,
             ) {
                 Button(
                     onClick = { /* settings action */ },
@@ -168,6 +194,7 @@ private fun NudgeKitSampleApp(manager: DataStoreTipManager) {
                 tip = addressTip,
                 manager = manager,
                 modifier = Modifier.fillMaxWidth(),
+                analytics = analytics,
             )
 
             HorizontalDivider()
@@ -175,10 +202,38 @@ private fun NudgeKitSampleApp(manager: DataStoreTipManager) {
             // ── Section 4: Reset ───────────────────────────────────
             SectionHeader("Controls")
             OutlinedButton(
-                onClick = { scope.launch { manager.resetAll() } },
+                onClick = {
+                    scope.launch { manager.resetAll() }
+                    analyticsEvents.clear()
+                },
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text("Reset All Tips")
+            }
+
+            HorizontalDivider()
+
+            // ── Section 5: Analytics ───────────────────────────────
+            SectionHeader("Analytics Events")
+            Text(
+                text = "SDK-agnostic TipAnalytics hook. A real app would forward " +
+                    "these to Firebase / Mixpanel / a logger.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            if (analyticsEvents.isEmpty()) {
+                Text(
+                    text = "No events yet — interact with the tips above.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            } else {
+                analyticsEvents.forEach { event ->
+                    Text(
+                        text = "• $event",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(32.dp))

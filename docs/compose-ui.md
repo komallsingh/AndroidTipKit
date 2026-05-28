@@ -117,6 +117,7 @@ fun ManagedInlineTip(
     modifier: Modifier = Modifier,
     colors: NudgeTipColors = NudgeTipDefaults.colors(),
     onActionClick: (() -> Unit)? = null,
+    analytics: TipAnalytics = NoOpTipAnalytics,
 )
 ```
 
@@ -124,11 +125,12 @@ Visibility behavior:
 
 1. Local visibility starts as `null` (not yet evaluated).
 2. A `LaunchedEffect(tipState, counters)` runs the manager's rules whenever DataStore state changes.
-3. If the tip becomes eligible, visibility flips to `true` and `markShown(tip.id)` is called **exactly once** per appearance.
+3. If the tip becomes eligible, visibility flips to `true` and `markShown(tip.id)` is called **exactly once** per appearance (and `analytics.onTipShown(tip)` alongside it).
 4. Once visible, the tip stays visible (sticky) even if `markShown` mutates state that would otherwise make rules fail (`MaxDisplayCount`). This prevents flicker.
-5. The tip hides immediately when the user taps dismiss (local state) and persists the dismiss asynchronously via `manager.dismiss(tip.id)`.
+5. The tip hides immediately when the user taps dismiss (local state), persists the dismiss asynchronously via `manager.dismiss(tip.id)`, and calls `analytics.onTipDismissed(tip)`.
 6. External dismiss (e.g. from another screen) is detected via `tipState.isDismissed` and hides the tip.
 7. After `manager.resetAll()`, DataStore emits fresh state and the tip can reappear with a new `markShown` call.
+8. The action button calls `analytics.onTipActionClicked(tip)` then your `onActionClick`.
 
 Example:
 
@@ -154,6 +156,7 @@ fun ManagedTipBox(
     position: TipPosition = TipPosition.Bottom,
     colors: NudgeTipColors = NudgeTipDefaults.colors(),
     onActionClick: (() -> Unit)? = null,
+    analytics: TipAnalytics = NoOpTipAnalytics,
     content: @Composable () -> Unit,
 )
 ```
@@ -172,6 +175,41 @@ ManagedTipBox(
     }
 }
 ```
+
+## Analytics
+
+Both managed components accept an optional `analytics: TipAnalytics` parameter
+(default `NoOpTipAnalytics`). NudgeKit bundles no analytics SDK — you forward
+events to whatever pipeline you already use (Firebase, Mixpanel, Amplitude, a
+logger, etc.). See [core-concepts.md](core-concepts.md#tipanalytics) for the
+interface.
+
+```kotlin
+class MyTipAnalytics(private val tracker: Tracker) : TipAnalytics {
+    override fun onTipShown(tip: Tip) = tracker.log("tip_shown", tip.id)
+    override fun onTipDismissed(tip: Tip) = tracker.log("tip_dismissed", tip.id)
+    override fun onTipActionClicked(tip: Tip) = tracker.log("tip_action", tip.id)
+}
+
+ManagedInlineTip(
+    tip = favoritesTip,
+    manager = tipManager,
+    analytics = MyTipAnalytics(tracker),
+    onActionClick = { openFavorites() },
+)
+```
+
+Each callback fires once per real user-facing event:
+
+| Callback | When |
+|----------|------|
+| `onTipShown` | When the tip becomes visible, in lock-step with `markShown` — **not** on every recomposition |
+| `onTipDismissed` | When the user taps the dismiss button |
+| `onTipActionClicked` | When the user taps the action button (fired before your `onActionClick`) |
+
+The pure-UI components (`InlineTip`, `TipBox`) deliberately take no `analytics`
+parameter — they stay callback-based. If you use them directly, call your
+analytics from their `onDismiss` / `onActionClick` callbacks yourself.
 
 ## Styling
 

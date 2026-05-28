@@ -26,7 +26,7 @@ Planned work, in roughly the order we expect to tackle it. Subject to change bas
 - [ ] Tip groups / mutual exclusion ("only show one tip from this group at a time").
 - [ ] `priority` field becomes meaningful — used to pick the highest-priority eligible tip within a group.
 - [ ] `TipRule.ExpiresAt(timestampMillis)` and `TipRule.ExpiresAfter(durationMillis)` for time-bounded tips.
-- [ ] Optional `TipAnalytics` interface so consumers can log `onShown`, `onDismissed`, `onActionClicked`.
+- [x] Optional `TipAnalytics` interface so consumers can observe `onTipShown`, `onTipDismissed`, `onTipActionClicked`. SDK-agnostic, no bundled dependency; wired into the managed components.
 
 ## v0.4 — KMP and broader reach
 

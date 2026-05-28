@@ -9,7 +9,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import dev.nudgekit.core.NoOpTipAnalytics
 import dev.nudgekit.core.Tip
+import dev.nudgekit.core.TipAnalytics
 import dev.nudgekit.core.TipCounters
 import dev.nudgekit.core.TipState
 import dev.nudgekit.datastore.DataStoreTipManager
@@ -33,11 +35,24 @@ import kotlinx.coroutines.launch
  * 5. After [resetAll][DataStoreTipManager.resetAll], rules are re-evaluated
  *    and the tip may reappear.
  *
+ * ### Analytics
+ *
+ * [analytics] receives lifecycle events, aligned with the visibility state
+ * machine so each fires once per real user-facing event:
+ * - [onTipShown][TipAnalytics.onTipShown] fires together with `markShown`
+ *   (once per appearance, not on every recomposition).
+ * - [onTipDismissed][TipAnalytics.onTipDismissed] fires when the user taps dismiss.
+ * - [onTipActionClicked][TipAnalytics.onTipActionClicked] fires when the user
+ *   taps the action button (only present when [onActionClick] is non-null).
+ *
+ * Defaults to [NoOpTipAnalytics], so analytics is strictly opt-in.
+ *
  * @param tip           The tip to display.
  * @param manager       The [DataStoreTipManager] that owns this tip's state.
  * @param modifier      Modifier applied to the outer card.
  * @param colors        Color scheme; defaults to [NudgeTipDefaults.colors].
  * @param onActionClick Called when the user taps the action button.
+ * @param analytics     Optional analytics hook; defaults to [NoOpTipAnalytics].
  */
 @Composable
 fun ManagedInlineTip(
@@ -46,6 +61,7 @@ fun ManagedInlineTip(
     modifier: Modifier = Modifier,
     colors: NudgeTipColors = NudgeTipDefaults.colors(),
     onActionClick: (() -> Unit)? = null,
+    analytics: TipAnalytics = NoOpTipAnalytics,
 ) {
     val scope = rememberCoroutineScope()
 
@@ -75,6 +91,8 @@ fun ManagedInlineTip(
                 if (shouldShow) {
                     visible = true
                     manager.markShown(tip.id)
+                    // Fires once per appearance, in lock-step with markShown.
+                    analytics.onTipShown(tip)
                 } else {
                     visible = false
                 }
@@ -93,7 +111,13 @@ fun ManagedInlineTip(
         onDismiss = {
             visible = false
             scope.launch { manager.dismiss(tip.id) }
+            analytics.onTipDismissed(tip)
         },
-        onActionClick = onActionClick,
+        onActionClick = onActionClick?.let { handleAction ->
+            {
+                analytics.onTipActionClicked(tip)
+                handleAction()
+            }
+        },
     )
 }

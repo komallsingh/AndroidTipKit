@@ -177,6 +177,46 @@ scope.launch {
 - `TipManager`: write-side lifecycle interface
 - `DataStoreTipManager`: Android DataStore implementation plus evaluation helpers
 - Managed UI: `ManagedInlineTip` and `ManagedTipBox`
+- `TipAnalytics`: SDK-agnostic hook for observing tip lifecycle events (`onTipShown`, `onTipDismissed`, `onTipActionClicked`)
+
+## Analytics
+
+NudgeKit bundles **no** analytics SDK and makes **no** network calls. Instead it
+exposes a tiny SDK-agnostic interface in `nudgekit-core`:
+
+```kotlin
+interface TipAnalytics {
+    fun onTipShown(tip: Tip) {}
+    fun onTipDismissed(tip: Tip) {}
+    fun onTipActionClicked(tip: Tip) {}
+}
+
+object NoOpTipAnalytics : TipAnalytics
+```
+
+Implement it to forward events to whatever you already use — Firebase,
+Mixpanel, Amplitude, a logger — then pass it to a managed component:
+
+```kotlin
+class MyTipAnalytics(private val tracker: Tracker) : TipAnalytics {
+    override fun onTipShown(tip: Tip) = tracker.log("tip_shown", tip.id)
+    override fun onTipDismissed(tip: Tip) = tracker.log("tip_dismissed", tip.id)
+    override fun onTipActionClicked(tip: Tip) = tracker.log("tip_action", tip.id)
+}
+
+ManagedInlineTip(
+    tip = favoritesTip,
+    manager = manager,
+    analytics = MyTipAnalytics(tracker),
+    onActionClick = { /* … */ },
+)
+```
+
+Events fire once per real user-facing action: `onTipShown` in lock-step with
+`markShown` (not on every recomposition), `onTipDismissed` on dismiss, and
+`onTipActionClicked` on the action button. The default is `NoOpTipAnalytics`,
+so analytics is strictly opt-in. Pure UI components (`InlineTip`, `TipBox`)
+stay callback-based — bridge their callbacks to analytics yourself if needed.
 
 ## Examples
 

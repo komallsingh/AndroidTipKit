@@ -89,7 +89,33 @@ OutlinedButton(
 }
 ```
 
-Clears all state and counters. All tips become eligible again as if the app were freshly installed.
+Clears all state and counters (and clears the analytics log). All tips become eligible again as if the app were freshly installed.
+
+### 5. Analytics events
+
+The sample wires a tiny SDK-agnostic `TipAnalytics` into all three managed
+components and renders the events on screen:
+
+```kotlin
+private class SampleTipAnalytics(
+    private val onEvent: (String) -> Unit,
+) : TipAnalytics {
+    override fun onTipShown(tip: Tip) = onEvent("shown: ${tip.id}")
+    override fun onTipDismissed(tip: Tip) = onEvent("dismissed: ${tip.id}")
+    override fun onTipActionClicked(tip: Tip) = onEvent("action: ${tip.id}")
+}
+
+// In the composable:
+val analyticsEvents = remember { mutableStateListOf<String>() }
+val analytics = remember { SampleTipAnalytics { analyticsEvents.add(0, it) } }
+
+ManagedInlineTip(tip = filterTip, manager = manager, analytics = analytics, /* … */)
+```
+
+The "Analytics Events" section lists strings like `shown: use_filters`,
+`dismissed: use_filters`, and `action: enable_notifications` as you interact
+with the tips. No external logging dependency is used — a real app would
+forward these to Firebase / Mixpanel / a logger instead.
 
 ## Manager instantiation pattern
 
@@ -113,7 +139,8 @@ This is simple and works for a demo. **Production apps should use a process-wide
 3. Tap "Visit Checkout" once. Nothing happens yet — the address tip needs 2 visits.
 4. Tap "Visit Checkout" again. The "Save Your Address" tip appears.
 5. The "Enable Notifications" tip uses `MaxDisplayCount(3)`. Restart the app three times. After the 3rd launch, the tip stops appearing.
-6. Tap "Reset All Tips". All three tips reappear.
+6. Watch the "Analytics Events" section fill in as tips appear, get dismissed, and have their actions tapped.
+7. Tap "Reset All Tips". All three tips reappear and the analytics log clears.
 
 ## Where to look next
 
