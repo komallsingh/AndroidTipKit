@@ -33,10 +33,26 @@ android {
         compose = true
     }
 
+    // Robolectric needs merged Android resources for the Compose UI tests.
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
+
     publishing {
         singleVariant("release") {
             withSourcesJar()
         }
+    }
+}
+
+// Compose UI tests rely on the debug-only ui-test-manifest (the empty test
+// Activity used by createComposeRule()). The release unit-test variant has no
+// such manifest, so we only run unit tests against debug.
+androidComponents {
+    beforeVariants(selector().withBuildType("release")) { variant ->
+        variant.enableUnitTest = false
     }
 }
 
@@ -57,6 +73,17 @@ dependencies {
     implementation(libs.compose.ui)
     implementation(libs.compose.material3)
     implementation(libs.coroutines.android)
+
+    // ── Test dependencies (local JVM via Robolectric) ─────────────────────
+    testImplementation(libs.junit)
+    testImplementation(libs.truth)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.ext.junit)
+    testImplementation(libs.coroutines.test)
+    testImplementation(libs.datastore.preferences)
+    testImplementation(composeBom)
+    testImplementation(libs.compose.ui.test.junit4)
+    debugImplementation(libs.compose.ui.test.manifest)
 }
 
 // The Android `release` component only exists after evaluation.
