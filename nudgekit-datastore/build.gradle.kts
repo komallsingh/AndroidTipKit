@@ -25,6 +25,13 @@ android {
         jvmTarget = "17"
     }
 
+    // Robolectric (used by the factory/singleton test) needs merged resources.
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
+
     publishing {
         singleVariant("release") {
             withSourcesJar()
@@ -48,6 +55,8 @@ dependencies {
     testImplementation(libs.truth)
     testImplementation(libs.coroutines.test)
     testImplementation(libs.turbine)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.ext.junit)
 }
 
 // The Android `release` component only exists after evaluation.

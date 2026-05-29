@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.preferencesDataStoreFile
@@ -15,9 +16,12 @@ import dev.nudgekit.core.TipEvaluator
 import dev.nudgekit.core.TipManager
 import dev.nudgekit.core.TipState
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import java.io.IOException
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * [TipManager] implementation backed by AndroidX DataStore Preferences.
@@ -26,11 +30,12 @@ import kotlinx.coroutines.flow.map
  * event counters, and screen-visit counters across app restarts.
  *
  * **Creation:** Use the [create] factory for the standard single-file setup.
- * Cache the returned instance for the lifetime of the process — creating
- * multiple instances that point to the same file causes undefined behavior.
+ * It returns a process-wide cached instance, so it is safe to call repeatedly.
  *
  * For testing or advanced scenarios (e.g. encrypted DataStore), use the
- * primary constructor directly.
+ * primary constructor directly. Note that AndroidX DataStore still requires
+ * at most one `DataStore` per file per process, so when constructing directly
+ * you are responsible for not pointing two instances at the same file.
  *
  * @param dataStore  The Preferences DataStore used for persistence.
  * @param evaluator  Rule evaluator from nudgekit-core. Defaults to a fresh instance.
@@ -41,6 +46,18 @@ class DataStoreTipManager(
     private val evaluator: TipEvaluator = TipEvaluator(),
     private val clock: () -> Long = System::currentTimeMillis,
 ) : TipManager {
+
+    /**
+     * Read stream that degrades gracefully on storage corruption. DataStore
+     * surfaces a read failure as an [IOException] in the flow; rather than
+     * letting that crash the host app's tip reads, we recover by emitting
+     * [emptyPreferences] (tips fall back to their default state). Non-IO
+     * errors are real bugs and are rethrown.
+     */
+    private val safeData: Flow<Preferences> = dataStore.data
+        .catch { cause ->
+            if (cause is IOException) emit(emptyPreferences()) else throw cause
+        }
 
     // ---------------------------------------------------------------
     // TipManager — write operations
@@ -98,12 +115,12 @@ class DataStoreTipManager(
     /** Returns the persisted state for [tipId], or a fresh default if none exists. */
     suspend fun getTipState(tipId: String): TipState {
         require(tipId.isNotBlank()) { "Tip ID must not be blank" }
-        return readTipState(dataStore.data.first(), tipId)
+        return readTipState(safeData.first(), tipId)
     }
 
     /** Returns the current global event and screen-visit counters. */
     suspend fun getCounters(): TipCounters {
-        return readCounters(dataStore.data.first())
+        return readCounters(safeData.first())
     }
 
     // ---------------------------------------------------------------
@@ -118,7 +135,7 @@ class DataStoreTipManager(
      */
     fun observeTipState(tipId: String): Flow<TipState> {
         require(tipId.isNotBlank()) { "Tip ID must not be blank" }
-        return dataStore.data
+        return safeData
             .map { prefs -> readTipState(prefs, tipId) }
             .distinctUntilChanged()
     }
@@ -130,7 +147,7 @@ class DataStoreTipManager(
      * any counter changes.
      */
     fun observeCounters(): Flow<TipCounters> {
-        return dataStore.data
+        return safeData
             .map { prefs -> readCounters(prefs) }
             .distinctUntilChanged()
     }
@@ -211,19 +228,31 @@ class DataStoreTipManager(
     companion object {
 
         /**
-         * Creates a [DataStoreTipManager] backed by a file named
+         * Process-wide cache of managers keyed by DataStore file name.
+         *
+         * AndroidX DataStore requires that at most one `DataStore` instance
+         * exist for a given file within a process — constructing a second one
+         * throws at runtime. Caching here makes [create] safe to call
+         * repeatedly (e.g. from multiple entry points) without that hazard.
+         */
+        private val instances = ConcurrentHashMap<String, DataStoreTipManager>()
+
+        /**
+         * Returns the process-wide [DataStoreTipManager] backed by a file named
          * `nudgekit_preferences.preferences_pb` inside the app's DataStore directory.
          *
-         * Call this **once** per process and cache the result (e.g. in your
-         * `Application` class or a DI graph). Creating multiple instances
-         * for the same file causes undefined behavior.
+         * Safe to call repeatedly: the first call creates the manager, and every
+         * later call returns the same cached instance. (You can still hold the
+         * result in your `Application`/DI graph if you prefer.)
          */
         fun create(context: Context): DataStoreTipManager {
             val appContext = context.applicationContext
-            val dataStore = androidx.datastore.preferences.core.PreferenceDataStoreFactory.create {
-                appContext.preferencesDataStoreFile(FILE_NAME)
+            return instances.getOrPut(FILE_NAME) {
+                val dataStore = androidx.datastore.preferences.core.PreferenceDataStoreFactory.create {
+                    appContext.preferencesDataStoreFile(FILE_NAME)
+                }
+                DataStoreTipManager(dataStore)
             }
-            return DataStoreTipManager(dataStore)
         }
 
         // -- File name --

@@ -15,6 +15,7 @@ import dev.nudgekit.core.TipAnalytics
 import dev.nudgekit.core.TipCounters
 import dev.nudgekit.core.TipState
 import dev.nudgekit.datastore.DataStoreTipManager
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 /**
@@ -110,7 +111,17 @@ fun ManagedInlineTip(
         colors = colors,
         onDismiss = {
             visible = false
-            scope.launch { manager.dismiss(tip.id) }
+            // UI is already updated optimistically; a persistence (IO) failure
+            // here must not crash the host. Cancellation is rethrown.
+            scope.launch {
+                try {
+                    manager.dismiss(tip.id)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (_: Exception) {
+                    // best-effort persist; the in-memory dismiss already took effect
+                }
+            }
             analytics.onTipDismissed(tip)
         },
         onActionClick = onActionClick?.let { handleAction ->
