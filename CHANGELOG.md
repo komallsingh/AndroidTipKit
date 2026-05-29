@@ -7,14 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0-alpha.1] - 2026-05-29
+
+Hardening, testing, and polish on top of the 0.2.0-alpha.1 foundation. Focus: no avoidable crashes for consuming apps, real test coverage for the managed UI, and Maven Central readiness. Public API changes are additive (no breaking changes). **Still not published to Maven Central** — that remains gated on maintainer accounts/keys.
+
 ### Added
-- Maven publishing **dry-run** configuration. The four library modules (`nudgekit-core`, `nudgekit-datastore`, `nudgekit-compose`, `nudgekit-compose-datastore`) apply `maven-publish` with shared coordinates `io.github.abdullajon1881:<module>:0.2.0-alpha.1` (group/version centralized in `gradle.properties`), sources JARs, and full POM metadata (name, description, URL, Apache-2.0 license, developer, SCM). `./gradlew publishToMavenLocal` generates artifacts into `~/.m2`. The `sample` app is intentionally not published.
-- Publishing groupId is `io.github.abdullajon1881` (Maven Central auto-verifies it against the GitHub account, no domain needed). The Kotlin package / Android namespace remain `dev.nudgekit.*` and are intentionally unchanged.
-- GPG signing scaffolding (`signing` plugin) on all four library modules using in-memory PGP keys. Signing is **gated**: it only activates when `signingInMemoryKey` (+ optional `signingInMemoryKeyId` / `signingInMemoryKeyPassword`) is supplied via `-P` or `ORG_GRADLE_PROJECT_*` env vars. With no keys present, signing is skipped so builds and CI stay green. No keyring is stored on disk and no key is committed. Signed artifacts are still a dry-run target — nothing is uploaded to a remote repository.
-- Javadoc JAR generation on all four library modules for Maven Central readiness (Central requires both sources and Javadoc JARs). The Kotlin/JVM `nudgekit-core` uses Gradle's `withJavadocJar()`; the Android modules attach a valid empty `-javadoc.jar` via a small `Jar` task (AGP's `withJavadocJar()` runs a Dokka worker that fails on the Kotlin/Compose sources). Each published module now emits the main artifact, `-sources.jar`, `-javadoc.jar`, `.module`, and `.pom`.
-- Maintainer runbook `docs/maintainers/maven-central-phase-c.md` documenting the remaining steps to publish to Maven Central (accounts, `io.github.abdullajon1881` namespace verification, real GPG key generation, GitHub Secrets, local signed-artifact verification, upload-strategy options, a pre-publish checklist, and rollback notes). Documentation only — no build config, credentials, or automation added. Linked from CONTRIBUTING.
-- README "Screenshots" gallery scaffold and `docs/images/` with a capture guide (`docs/images/README.md`). The gallery references the planned `sample`-app screenshots (InlineTip, TipBox top/bottom, a managed flow) in light/dark; the actual image files are added separately by a maintainer.
-- **Not** configured: GPG signing and Maven Central / Sonatype upload — both intentionally deferred to later phases. Nothing is published to any remote repository.
+- Managed-component Compose tests in `nudgekit-compose-datastore` (Robolectric, 6 tests): `ManagedInlineTip`/`ManagedTipBox` visibility, `markShown` exactly once per appearance, analytics events, dismissal + persistence, and anchor-always-renders. Deterministic via `composeRule.waitUntil` (no sleeps). CI now runs `:nudgekit-compose-datastore:test`.
+- Robustness tests in `nudgekit-datastore` (37 → 44): IO-error reads degrade to defaults; `create()` returns the same cached instance. Adds Robolectric to the module.
+- Real Dokka (javadoc-format) API docs packaged into every module's `-javadoc.jar` (previously empty placeholders).
+- Maven publishing **dry-run**: `maven-publish` on the four library modules with coordinates `io.github.abdullajon1881:<module>:0.3.0-alpha.1`, sources + Javadoc JARs, and full POM metadata (name, description, URL, Apache-2.0, developer, SCM). `publishToMavenLocal` produces the complete set; the `sample` app is not published.
+- Gated in-memory GPG signing (`signing` plugin): activates only when `signingInMemoryKey` (+ optional `signingInMemoryKeyId` / `signingInMemoryKeyPassword`) is supplied via `-P` / `ORG_GRADLE_PROJECT_*`; skipped otherwise so builds and CI stay green. No keys committed; nothing uploaded to a remote.
+- Maintainer runbook `docs/maintainers/maven-central-phase-c.md` for the remaining Central-publish steps (accounts, namespace verification, real GPG key, GitHub Secrets, upload options, pre-publish checklist, rollback).
+- README "Screenshots" gallery scaffold and `docs/images/` capture guide; the actual image files are added separately by a maintainer.
+
+### Changed
+- **Robustness:** `DataStoreTipManager` routes all reads through a flow that catches `IOException` and emits empty preferences, so a corrupted/unreadable store degrades tips to their defaults instead of crashing the host (non-IO errors still propagate). `create()` now returns a process-wide cached instance, making it safe to call repeatedly (avoids the "two DataStores over one file" runtime crash). Managed dismiss writes are wrapped so an IO failure can't crash the host.
+- Managed components use `collectAsStateWithLifecycle` (was `collectAsState`), pausing DataStore flow collection while the host lifecycle is stopped. Adds `lifecycle-runtime-compose` to `nudgekit-compose-datastore` only.
+- `TipBox` Start/End is now responsive: the tip takes up to half the width (capped at 240 dp) and respects RTL, instead of a fixed 240 dp that crowded narrow screens. Top/Bottom unchanged.
+- Publishing groupId is `io.github.abdullajon1881` (Maven Central auto-verifies it via the GitHub account, no domain needed). The Kotlin package / Android namespace remain `dev.nudgekit.*`.
+
+### Fixed
+- Corrected the `MaxDisplayCount` docs: a tip shows **exactly `n` times** (the prior "can reach `count + 1`" note was wrong). Documented that `Tip.id` must be unique and stable (it is the persistence key).
+
+### Tests
+- **139 tests, 0 failures** — `nudgekit-core` 78, `nudgekit-datastore` 44, `nudgekit-compose` 11, `nudgekit-compose-datastore` 6.
+
+### Known limitations
+- Not published to Maven Central yet (gated on maintainer accounts / GPG key / auth).
+- Managed components observe all counters (`observeCounters()`) — intentional, since `TipRule.Custom` may read any counter; re-evaluation on any counter change is the correct, safe behavior.
+- `TipBox` is in-flow, not a floating overlay/popover.
 
 ## [0.2.0-alpha.1] - 2026-05-28
 

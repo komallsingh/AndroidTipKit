@@ -8,8 +8,8 @@ NudgeKit is an Android library for contextual tips, feature discovery hints, and
 
 Status:
 
-- MVP implemented (latest: 0.2.0-alpha.1)
-- 126 unit tests passing in a correctly configured environment
+- MVP implemented (latest: 0.3.0-alpha.1)
+- 139 tests passing in a correctly configured environment
 - sample app included
 - GitHub Actions CI configured
 - local Maven publishing dry-run configured (`publishToMavenLocal`)

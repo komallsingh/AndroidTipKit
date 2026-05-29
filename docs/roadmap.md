@@ -9,17 +9,23 @@ Planned work, in roughly the order we expect to tackle it. Subject to change bas
 - [x] `nudgekit-compose`: `InlineTip`, `TipBox`, `ManagedInlineTip`, `ManagedTipBox`, `TipPosition`, `NudgeTipDefaults`, `NudgeTipColors`, previews.
 - [x] Working sample app exercising all of the above.
 
-## v0.2 — Hardening (current, 0.2.0-alpha.1)
+## v0.2 — Module split + analytics (shipped, 0.2.0-alpha.1)
 
 - [x] CI pipeline (GitHub Actions): build, test, lint, sample APK assembly.
 - [x] Split `nudgekit-compose` so pure-UI consumers don't pull in DataStore. Managed components moved to a new `nudgekit-compose-datastore` module; `nudgekit-compose` no longer depends on `nudgekit-datastore`.
 - [x] Initial Compose UI tests for the pure-UI components (`InlineTip`, `TipBox`).
 - [x] SDK-agnostic `TipAnalytics` hooks wired into the managed components.
-- [x] 126 passing tests across `nudgekit-core` (78), `nudgekit-datastore` (37), and `nudgekit-compose` (11).
-- [ ] Compose UI tests for the managed variants (`ManagedInlineTip`, `ManagedTipBox`) in `nudgekit-compose-datastore`.
-- [ ] Adopt `collectAsStateWithLifecycle` as opt-in via a parameter or separate artifact.
+
+## v0.3 — Hardening (current, 0.3.0-alpha.1)
+
+- [x] DataStore IO-error resilience + safe single-instance `create()`.
+- [x] Compose UI tests for the managed variants (`ManagedInlineTip`, `ManagedTipBox`).
+- [x] `collectAsStateWithLifecycle` in the managed components.
+- [x] Responsive `TipBox` Start/End positioning (RTL-aware).
+- [x] Real Dokka API docs in the published Javadoc JARs.
+- [x] 139 passing tests across `nudgekit-core` (78), `nudgekit-datastore` (44), `nudgekit-compose` (11), and `nudgekit-compose-datastore` (6).
 - [ ] Accessibility audit of all UI components (touch targets, content descriptions, dynamic type, dark mode contrast).
-- [ ] Maven Central publishing (`maven-publish` plugin, signing config, staging workflow).
+- [ ] Maven Central publishing (real GPG key, Sonatype account, upload). Dry-run + signing scaffolding already in place.
 
 ## v0.3 — UX and ergonomics
 

@@ -4,20 +4,21 @@ NudgeKit is an MVP. This document is the honest list of what does not work yet, 
 
 ## Distribution
 
-- **Not published to Maven Central.** Coordinates like `io.github.abdullajon1881:nudgekit-core:0.2.0-alpha.1` are placeholders. Use the modules locally for now (Git submodule + `includeBuild`, or vendored sources).
+- **Not published to Maven Central.** Coordinates like `io.github.abdullajon1881:nudgekit-core:0.3.0-alpha.1` are placeholders. Use the modules locally for now (Git submodule + `includeBuild`, or vendored sources).
 - **No version tags.** No semantic-versioning guarantees yet. APIs may change before the first published release.
 
 ## Testing
 
-- **Compose UI tests cover the pure-UI components only.** `:nudgekit-compose` now has Robolectric-based Compose tests for `InlineTip` and `TipBox` (rendering, action/dismiss buttons, visibility). The **managed** components (`ManagedInlineTip`, `ManagedTipBox`) are not yet covered by automated tests — they are still verified by previews and the sample app. Adding managed-component coverage (DataStore + Compose `mainClock` coordination) is the next testing priority.
+- **Compose UI tests** (Robolectric, local JVM) cover both the pure-UI components (`InlineTip`, `TipBox`) and the managed components (`ManagedInlineTip`, `ManagedTipBox`).
 - **No KMP test target.** `:nudgekit-core` is pure Kotlin/JVM today and tested as such. It is not yet a Kotlin Multiplatform module.
 
 Test counts:
 
 - `:nudgekit-core` — 78 unit tests, 0 failures.
-- `:nudgekit-datastore` — 37 unit tests, 0 failures.
+- `:nudgekit-datastore` — 44 unit tests, 0 failures.
 - `:nudgekit-compose` — 11 Compose UI tests (Robolectric), 0 failures.
-- Total: **126 tests, 0 failures**.
+- `:nudgekit-compose-datastore` — 6 Compose UI tests (Robolectric), 0 failures.
+- Total: **139 tests, 0 failures**.
 
 ## Module structure
 
