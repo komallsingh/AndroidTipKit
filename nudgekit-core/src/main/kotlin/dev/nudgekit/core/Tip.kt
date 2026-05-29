@@ -5,6 +5,11 @@ package dev.nudgekit.core
  *
  * Tips are immutable value objects. Define them as top-level `val` constants
  * or inside an `object` holder and reuse the same instance throughout the app.
+ *
+ * [id] must be **unique and stable** across the app: it is the persistence key
+ * for this tip's state (dismissed flag, display count, last-shown time). Two
+ * tips sharing an [id] would share — and corrupt — each other's state, and
+ * changing an [id] later resets that tip's history.
  */
 data class Tip(
     val id: String,

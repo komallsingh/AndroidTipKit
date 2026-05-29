@@ -26,8 +26,8 @@ Test counts:
 ## Compose components
 
 - **Broad counter observation.** `ManagedInlineTip` and `ManagedTipBox` subscribe to `observeCounters()` and re-evaluate whenever *any* counter changes — not only the ones referenced by the tip's rules. Fine for typical apps; suboptimal at scale.
-- **`MaxDisplayCount` sticky-show.** Without intervention, the Nth display would briefly appear and then disappear because `markShown` pushes `displayCount` past the limit. Managed components avoid this by treating "currently showing" as a sticky local state and re-evaluating only when the tip is hidden or externally dismissed. This is correct UX but means the **persisted display count can reach `count + 1`** on the Nth show. If you read `displayCount` directly, treat `>= count` as "max reached."
-- **`TipBox` Start/End positions** use a fixed `widthIn(max = 240.dp)` inside a `Row`. Intentionally simple for now; may not look right on very narrow screens or with very long messages. Real popover-style positioning is on the roadmap.
+- **Sticky-show (a deliberate design choice, not a bug).** Managed components treat "currently showing" as sticky local state: once a tip is on screen it stays for that appearance and is only re-evaluated when hidden or dismissed. This stops a tip from flickering away mid-view if `markShown` mutates state that a rule depends on. A `MaxDisplayCount(n)` tip therefore shows **exactly `n` times**, and the persisted `displayCount` reaches exactly `n` (the evaluator hides at `displayCount >= n`).
+- **`TipBox` Start/End** lay the tip beside the anchor in a `Row`. The tip takes up to half the width, capped at 240 dp, and respects layout direction (RTL). It is in-flow, not a floating popover (overlay-style anchoring with an arrow is on the roadmap).
 - **Dismiss button touch target.** The dismiss `IconButton` is 40 dp, slightly below the Material 48 dp recommendation, chosen to fit small cards. We will revisit this once we have accessibility-focused UI tests.
 
 ## DataStore

@@ -43,7 +43,7 @@ data class Tip(
 )
 ```
 
-- `id` is the persistence key. Choose a stable, descriptive string.
+- `id` is the persistence key, and must be **unique and stable** across the app. Two tips sharing an `id` would share and corrupt each other's state; changing an `id` later resets that tip's history. Choose a descriptive, permanent string.
 - All string fields must be non-blank (`require` runs in `init`).
 - `priority` is currently informational. It will be used by tip-group features in a later release.
 
