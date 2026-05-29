@@ -138,3 +138,42 @@ private fun TipBoxTopPreview() {
         }
     }
 }
+
+@Preview(showBackground = true, name = "TipBox – end (narrow 320dp)", widthDp = 320)
+@Composable
+private fun TipBoxEndNarrowPreview() {
+    MaterialTheme(colorScheme = lightColorScheme()) {
+        Surface(modifier = Modifier.padding(16.dp)) {
+            TipBox(
+                tip = previewTipWithAction,
+                visible = true,
+                position = TipPosition.End,
+                onDismiss = {},
+                onActionClick = {},
+            ) {
+                Button(onClick = {}) {
+                    Text("Filters")
+                }
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "TipBox – start (wide 480dp)", widthDp = 480)
+@Composable
+private fun TipBoxStartWidePreview() {
+    MaterialTheme(colorScheme = lightColorScheme()) {
+        Surface(modifier = Modifier.padding(16.dp)) {
+            TipBox(
+                tip = previewTipBasic,
+                visible = true,
+                position = TipPosition.Start,
+                onDismiss = {},
+            ) {
+                Button(onClick = {}) {
+                    Text("Settings")
+                }
+            }
+        }
+    }
+}

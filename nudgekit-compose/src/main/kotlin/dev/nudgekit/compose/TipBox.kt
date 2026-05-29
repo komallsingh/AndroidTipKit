@@ -27,8 +27,10 @@ import dev.nudgekit.core.Tip
  *
  * For [TipPosition.Top] and [TipPosition.Bottom], a vertical [Column] layout
  * is used and the tip animates in/out. For [TipPosition.Start] and
- * [TipPosition.End], a horizontal [Row] layout is used with the tip
- * constrained to a maximum width of 240 dp.
+ * [TipPosition.End], a horizontal [Row] layout is used; the tip takes up to
+ * half the available width (capped at 240 dp) so it scales down on narrow
+ * screens, and the anchor [content] fills the rest. Layout direction (LTR/RTL)
+ * is respected — `Start`/`End` follow the reading direction.
  *
  * @param tip           The tip to display.
  * @param visible       Whether the tip is currently shown.
@@ -98,7 +100,10 @@ fun TipBox(
                 AnimatedVisibility(visible = visible) {
                     InlineTip(
                         tip = tip,
+                        // Responsive: up to half the row, capped at 240dp — so it
+                        // scales down on narrow screens instead of crowding content.
                         modifier = Modifier
+                            .fillMaxWidth(0.5f)
                             .widthIn(max = 240.dp)
                             .padding(end = NudgeTipDefaults.AnchorSpacing),
                         colors = colors,
@@ -116,7 +121,10 @@ fun TipBox(
                 AnimatedVisibility(visible = visible) {
                     InlineTip(
                         tip = tip,
+                        // Responsive: up to half the row, capped at 240dp — so it
+                        // scales down on narrow screens instead of crowding content.
                         modifier = Modifier
+                            .fillMaxWidth(0.5f)
                             .widthIn(max = 240.dp)
                             .padding(start = NudgeTipDefaults.AnchorSpacing),
                         colors = colors,
