@@ -2,13 +2,13 @@ package dev.nudgekit.compose
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.nudgekit.core.NoOpTipAnalytics
 import dev.nudgekit.core.Tip
 import dev.nudgekit.core.TipAnalytics
@@ -64,9 +64,9 @@ fun ManagedTipBox(
 
     // ── Reactive DataStore observations ────────────────────────────
     val tipState by manager.observeTipState(tip.id)
-        .collectAsState(initial = TipState(tipId = tip.id))
+        .collectAsStateWithLifecycle(initialValue = TipState(tipId = tip.id))
     val counters by manager.observeCounters()
-        .collectAsState(initial = TipCounters())
+        .collectAsStateWithLifecycle(initialValue = TipCounters())
 
     // ── Evaluation logic ───────────────────────────────────────────
     LaunchedEffect(tipState, counters) {

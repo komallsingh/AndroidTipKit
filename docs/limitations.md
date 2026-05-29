@@ -25,7 +25,6 @@ Test counts:
 
 ## Compose components
 
-- **`collectAsState` not `collectAsStateWithLifecycle`.** Managed components do not pause Flow collection when the host lifecycle is in the background. Adding `androidx.lifecycle:lifecycle-runtime-compose` is on the roadmap so consumers can opt in.
 - **Broad counter observation.** `ManagedInlineTip` and `ManagedTipBox` subscribe to `observeCounters()` and re-evaluate whenever *any* counter changes — not only the ones referenced by the tip's rules. Fine for typical apps; suboptimal at scale.
 - **`MaxDisplayCount` sticky-show.** Without intervention, the Nth display would briefly appear and then disappear because `markShown` pushes `displayCount` past the limit. Managed components avoid this by treating "currently showing" as a sticky local state and re-evaluating only when the tip is hidden or externally dismissed. This is correct UX but means the **persisted display count can reach `count + 1`** on the Nth show. If you read `displayCount` directly, treat `>= count` as "max reached."
 - **`TipBox` Start/End positions** use a fixed `widthIn(max = 240.dp)` inside a `Row`. Intentionally simple for now; may not look right on very narrow screens or with very long messages. Real popover-style positioning is on the roadmap.

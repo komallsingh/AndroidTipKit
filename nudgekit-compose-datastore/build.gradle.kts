@@ -73,6 +73,8 @@ dependencies {
     implementation(libs.compose.ui)
     implementation(libs.compose.material3)
     implementation(libs.coroutines.android)
+    // Lifecycle-aware flow collection for the managed components.
+    implementation(libs.lifecycle.runtime.compose)
 
     // ── Test dependencies (local JVM via Robolectric) ─────────────────────
     testImplementation(libs.junit)
