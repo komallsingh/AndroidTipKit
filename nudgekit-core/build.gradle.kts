@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     `maven-publish`
     signing
+    alias(libs.plugins.dokka)
 }
 
 group = providers.gradleProperty("nudgekitGroup").get()
@@ -11,9 +12,14 @@ java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
     withSourcesJar()
-    // Javadoc JAR for Maven Central readiness. Sources are Kotlin, so the
-    // jar is effectively empty but valid — Central only requires its presence.
-    withJavadocJar()
+}
+
+// Real API docs (Dokka, javadoc format) packaged as the -javadoc.jar required
+// by Maven Central. Output dir is build/dokka/javadoc.
+val javadocJar by tasks.registering(Jar::class) {
+    dependsOn("dokkaJavadoc")
+    archiveClassifier.set("javadoc")
+    from(layout.buildDirectory.dir("dokka/javadoc"))
 }
 
 kotlin {
@@ -33,6 +39,7 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             from(components["java"])
+            artifact(javadocJar)
             artifactId = "nudgekit-core"
             pom {
                 name.set("NudgeKit Core")

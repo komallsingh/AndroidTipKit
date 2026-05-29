@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     `maven-publish`
     signing
+    alias(libs.plugins.dokka)
 }
 
 group = providers.gradleProperty("nudgekitGroup").get()
@@ -39,11 +40,12 @@ android {
     }
 }
 
-// Maven Central requires a Javadoc JAR. AGP's withJavadocJar() runs a Dokka
-// worker that fails on these Kotlin/Compose sources, so we attach a valid
-// (empty) Javadoc JAR instead. Real API docs can be wired with Dokka later.
+// Real API docs (Dokka, javadoc format) packaged as the -javadoc.jar required
+// by Maven Central. Output dir is build/dokka/javadoc.
 val javadocJar by tasks.registering(Jar::class) {
+    dependsOn("dokkaJavadoc")
     archiveClassifier.set("javadoc")
+    from(layout.buildDirectory.dir("dokka/javadoc"))
 }
 
 dependencies {
