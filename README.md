@@ -18,8 +18,7 @@ Status:
 
 ## Screenshots
 
-> Captured from the bundled [`sample`](sample/) app. **Images are placeholders
-> until added** — see [docs/images/README.md](docs/images/README.md) for capture
+> Captured from the bundled [`sample`](sample/) app. — see [docs/images/README.md](docs/images/README.md) for capture
 > guidance.
 
 | | Light | Dark |
